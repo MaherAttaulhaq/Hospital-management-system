@@ -1,0 +1,116 @@
+import { NextResponse } from "next/server";
+import db from "@/db";
+import { billing as billingsTable } from "@/db/schemas";
+import { eq } from "drizzle-orm";
+
+
+/**
+ * @openapi
+ * /api/billings/{id}:
+ *   get:
+ *     summary: Get a doctor by ID
+ *     tags:
+ *       - Billings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '200':
+ *         description: OK
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Doctor'
+ *       '404':
+ *         description: Not found
+ *   put:
+ *     summary: Update a billing by ID
+ *     tags:
+ *       - Billings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Doctor'
+ *     responses:
+ *       '200':
+ *         description: Updated
+ *   delete:
+ *     summary: Delete a billing 
+ *     tags:
+ *       - Billings
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *     responses:
+ *       '204':
+ *         description: Deleted
+ */
+
+export async function GET(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params;
+  const doctor = await db
+    .select()
+    .from(billingsTable)
+    .where(eq(billingsTable.id, parseInt(id)))
+    .get();
+  console.log(doctor);
+  if (!doctor) {
+    return NextResponse.json({ error: "Not found", status: 404 });
+  }
+  return NextResponse.json(doctor);
+}
+
+export async function PUT(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const body = await req.json();
+  console.log(body);
+  const { id } = params;
+  console.log(id);
+  const updated = await db
+    .update(billingsTable)
+    .set({
+      patientId: body.patientId,
+      appointmentId: body.appointmentId,
+      amount: body.amount,
+      status: body.status,
+      paymentMethod: body.paymentMethod,
+    })
+    .where(eq(billingsTable.id, parseInt(id)))
+    .returning()
+    .get();
+  if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
+  return NextResponse.json(updated);
+}
+
+export async function DELETE(
+  req: Request,
+  { params }: { params: { id: string } }
+) {
+  const { id } = await params;
+  const ok = await db
+    .delete(billingsTable)
+    .where(eq(billingsTable.id, parseInt(id)))
+    .returning()
+    .get();
+  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+  return new NextResponse(null, { status: 204 });
+}

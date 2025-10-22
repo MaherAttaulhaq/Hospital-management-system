@@ -1,0 +1,11 @@
+[
+  {
+    "id": "1",
+    "name": "Dr. Alice Smith",
+    "specialty": "Cardiology",
+    "email": "alice.smith@example.com",
+    "phone": "555-0101",
+    "createdAt": "2025-10-20T00:00:00.000Z",
+    "updatedAt": "2025-10-20T00:00:00.000Z"
+  }
+]

@@ -1,0 +1,63 @@
+import { NextResponse } from "next/server";
+import db from "@/db";
+import { eq } from "drizzle-orm";
+import { doctors as doctorsTable } from "@/db/schemas";
+
+/**
+ * @openapi
+ * /api/doctors:
+ *   get:
+ *     summary: List all doctors
+ *     tags:
+ *       - Doctors
+ *     responses:
+ *       '200':
+ *         description: List of doctors
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/Doctor'
+ *   post:
+ *     summary: Create a doctor
+ *     tags:
+ *       - Doctors
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/Doctor'
+ *     responses:
+ *       '201':
+ *         description: Doctor created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Doctor'
+ */
+
+export async function GET() {
+  const doctors = await db.select().from(doctorsTable);
+  return NextResponse.json(doctors);
+}
+
+export async function POST(req: Request) {
+  const data = await req.json();
+  console.log("data", data);
+  const doctor = await db
+    .insert(doctorsTable)
+    .values({
+      userId: data.user_id,
+      specialization: data.specialization,
+      fees: data.fees,
+      availability: data.availability,
+    })
+    .returning()
+    .get();
+
+  console.log("doctor", doctor);
+
+  return NextResponse.json(doctor, { status: 201 });
+}
