@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { prescriptions as prescriptionsTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
+import { prescriptionSchema } from "@/lib/validation/prescriptionSchema";
 
 /**
  * @openapi
@@ -69,7 +70,10 @@ export async function GET(
     .from(prescriptionsTable)
     .where(eq(prescriptionsTable.id, parseInt(id)))
     .get();
-  console.log(patient);
+  const validation = prescriptionSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   if (!patient) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }
@@ -93,6 +97,10 @@ export async function PUT(
     .where(eq(prescriptionsTable.id, parseInt(id)))
     .returning()
     .get();
+  const validation = prescriptionSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
   return NextResponse.json(updated);
 }
@@ -107,6 +115,10 @@ export async function DELETE(
     .where(eq(prescriptionsTable.id, parseInt(id)))
     .returning()
     .get();
+  const validation = prescriptionSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

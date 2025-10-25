@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { eq } from "drizzle-orm";
 import { appointments as appointmentsTable } from "@/db/schemas";
+import { userAppointmentSchema } from "@/lib/validation/userAppointmentSchema";
 /**
  * @openapi
  * /api/appointments:
@@ -33,19 +34,20 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const data = await req.json();
-  console.log("data", data);
   const appointment = await db
     .insert(appointmentsTable)
     .values({
       date: data.date,
       patientId: data.patientId,
       doctorId: data.doctorId,
-      status: data.status ?? "scheduled",
+      status: data.status,
     })
     .returning()
     .get();
-
-  console.log("appointment", appointment);
+  const validation = userAppointmentSchema.safeParse(data);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
 
   return NextResponse.json(appointment, { status: 201 });
 }

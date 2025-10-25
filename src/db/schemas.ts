@@ -68,3 +68,11 @@ export const pharmacy = sqliteTable("pharmacy", {
   price: integer("price").notNull(),
   expiryDate: text("expiry_date"), // ISO date string
 });
+// ---------------- Register ----------------
+export const register = sqliteTable("register", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  username: text("username").notNull(),
+  email: text("email").notNull(),
+  password: text("password").notNull(),
+  confirmPassword: text("confirmPassword").notNull(),
+});

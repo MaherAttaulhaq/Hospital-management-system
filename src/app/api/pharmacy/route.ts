@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { eq } from "drizzle-orm";
 import { pharmacy as pharmacyTable } from "@/db/schemas";
+import { patientSchema } from "@/lib/validation/patientSchema";
 
 /**
  * @openapi
@@ -46,7 +47,10 @@ export async function POST(req: Request) {
     .returning()
     .get();
 
-  console.log("pharmacy", pharmacy);
+  const validation = patientSchema.safeParse(data);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
 
   return NextResponse.json(pharmacy, { status: 201 });
 }

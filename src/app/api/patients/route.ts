@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { eq } from "drizzle-orm";
 import { patients as patientsTable } from "@/db/schemas";
+import { patientSchema } from "@/lib/validation/patientSchema";
 /**
  * @openapi
  * /api/patients:
@@ -27,13 +28,13 @@ import { patients as patientsTable } from "@/db/schemas";
  *         description: Created
  */
 export async function GET() {
-  const doctors = await db.select().from(patientsTable);
-  return NextResponse.json(doctors);
+  const patients = await db.select().from(patientsTable);
+  return NextResponse.json(patients);
 }
 
 export async function POST(req: Request) {
   const data = await req.json();
-  console.log("data", data);
+
   const patient = await db
     .insert(patientsTable)
     .values({
@@ -44,8 +45,10 @@ export async function POST(req: Request) {
     })
     .returning()
     .get();
-
-  console.log("patient", patient);
+  const validation = patientSchema.safeParse(data);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
 
   return NextResponse.json(patient, { status: 201 });
 }

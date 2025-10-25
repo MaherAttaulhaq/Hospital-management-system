@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { eq } from "drizzle-orm";
 import { billing as billingsTable } from "@/db/schemas";
+import { billingSchema } from "@/lib/validation/billingSchema";
 /**
  * @openapi
  * /api/billings:
@@ -44,8 +45,10 @@ export async function POST(req: Request) {
     })
     .returning()
     .get();
-
-  console.log("billing", billing);
+  const validation = billingSchema.safeParse(data);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
 
   return NextResponse.json(billing, { status: 201 });
 }

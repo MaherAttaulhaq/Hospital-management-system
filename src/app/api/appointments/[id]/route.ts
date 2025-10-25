@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
 import { eq } from "drizzle-orm";
+import { userAppointmentSchema } from "@/lib/validation/userAppointmentSchema";
 import { appointments as appointmentsTable } from "@/db/schemas";
 /**
  * @openapi
@@ -68,7 +69,10 @@ export async function GET(
     .from(appointmentsTable)
     .where(eq(appointmentsTable.id, parseInt(id)))
     .get();
-  console.log(appointments);
+  const validation = userAppointmentSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   if (!appointments) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }
@@ -92,6 +96,10 @@ export async function PUT(
     .where(eq(appointmentsTable.id, parseInt(id)))
     .returning()
     .get();
+  const validation = userAppointmentSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
 
   if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
   return NextResponse.json(updated);
@@ -101,11 +109,16 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
   const ok = await db
     .delete(appointmentsTable)
     .where(eq(appointmentsTable.id, parseInt(params.id)))
     .returning()
     .get();
+  const validation = userAppointmentSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

@@ -1,16 +1,16 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
-import { billing as billingsTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
-import { billingSchema } from "@/lib/validation/billingSchema";
-
+import { register as registerTable } from "@/db/schemas";
+import { z } from "zod";
+import { userSignupSchema } from "@/lib/validation/userSignupSchema";
 /**
  * @openapi
- * /api/billings/{id}:
+ * /api/register/{id}:
  *   get:
- *     summary: Get a billings by ID
+ *     summary: Get a register by ID
  *     tags:
- *       - Billings
+ *       - Register
  *     parameters:
  *       - in: path
  *         name: id
@@ -27,9 +27,9 @@ import { billingSchema } from "@/lib/validation/billingSchema";
  *       '404':
  *         description: Not found
  *   put:
- *     summary: Update a billing by ID
+ *     summary: Update a register
  *     tags:
- *       - Billings
+ *       - Register
  *     parameters:
  *       - in: path
  *         name: id
@@ -46,9 +46,9 @@ import { billingSchema } from "@/lib/validation/billingSchema";
  *       '200':
  *         description: Updated
  *   delete:
- *     summary: Delete a billing
+ *     summary: Delete a register
  *     tags:
- *       - Billings
+ *       - Register
  *     parameters:
  *       - in: path
  *         name: id
@@ -59,48 +59,43 @@ import { billingSchema } from "@/lib/validation/billingSchema";
  *       '204':
  *         description: Deleted
  */
-
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
-  const doctor = await db
+  const { id } = params;
+  const user = await db
     .select()
-    .from(billingsTable)
-    .where(eq(billingsTable.id, parseInt(id)))
+    .from(registerTable)
+    .where(eq(registerTable.id, parseInt(id)))
     .get();
-  const validation = billingSchema.safeParse(id);
+  const validation = userSignupSchema.safeParse(id);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
-  if (!doctor) {
+  if (!user) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }
-  return NextResponse.json(doctor);
+  return NextResponse.json(user);
 }
-
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   const body = await req.json();
-  console.log(body);
-  const { id } = params;
-  console.log(id);
+  const { id } = await params;
   const updated = await db
-    .update(billingsTable)
+    .update(registerTable)
     .set({
-      patientId: body.patientId,
-      appointmentId: body.appointmentId,
-      amount: body.amount,
-      status: body.status,
-      paymentMethod: body.paymentMethod,
-    })
-    .where(eq(billingsTable.id, parseInt(id)))
+      username: body.username,
+      email: body.email,
+      password: body.password,
+      confirmPassword: body.confirmPassword,
+    } as any)
+    .where(eq(registerTable.id, parseInt(id)))
     .returning()
     .get();
-  const validation = billingSchema.safeParse(body);
+  const validation = userSignupSchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
@@ -114,11 +109,11 @@ export async function DELETE(
 ) {
   const { id } = await params;
   const ok = await db
-    .delete(billingsTable)
-    .where(eq(billingsTable.id, parseInt(id)))
+    .delete(registerTable)
+    .where(eq(registerTable.id, parseInt(id)))
     .returning()
     .get();
-  const validation = billingSchema.safeParse(id);
+  const validation = userSignupSchema.safeParse(id);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
