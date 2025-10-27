@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import db from "@/db";
 import { eq } from "drizzle-orm";
 import { pharmacy as pharmacyTable } from "@/db/schemas";
-import { patientSchema } from "@/lib/validation/patientSchema";
+import { pharmacySchema } from "@/lib/validation/pharmacySchema";
 
 /**
  * @openapi
@@ -13,7 +13,24 @@ import { patientSchema } from "@/lib/validation/patientSchema";
  *       - Pharmacy
  *     responses:
  *       '200':
- *         description: OK
+ *         description: A list of pharmacy items
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   name:
+ *                     type: string
+ *                   quantity:
+ *                     type: integer
+ *                   price:
+ *                     type: number
+ *                   expiryDate:
+ *                     type: string
  *   post:
  *     summary: Create a pharmacy item
  *     tags:
@@ -24,9 +41,35 @@ import { patientSchema } from "@/lib/validation/patientSchema";
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               name:
+ *                 type: string
+ *               quantity:
+ *                 type: integer
+ *               price:
+ *                 type: number
+ *               expiryDate:
+ *                 type: string
  *     responses:
  *       '201':
- *         description: Created
+ *         description: Pharmacy item created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 name:
+ *                   type: string
+ *                 quantity:
+ *                   type: integer
+ *                 price:
+ *                   type: number
+ *                 expiryDate:
+ *                   type: string
+ *       '400':
+ *         description: Invalid input
  */
 export async function GET() {
   const pharmacy = await db.select().from(pharmacyTable);
@@ -47,7 +90,7 @@ export async function POST(req: Request) {
     .returning()
     .get();
 
-  const validation = patientSchema.safeParse(data);
+  const validation = pharmacySchema.safeParse(data);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }

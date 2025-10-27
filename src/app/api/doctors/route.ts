@@ -28,7 +28,16 @@ import { doctorSchema } from "@/lib/validation/doctorSchema";
  *       content:
  *         application/json:
  *           schema:
- *             $ref: '#/components/schemas/Doctor'
+ *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *               specialization:
+ *                 type: string
+ *               fees:
+ *                 type: integer
+ *               availability:
+ *                 type: string
  *     responses:
  *       '201':
  *         description: Doctor created
@@ -36,6 +45,8 @@ import { doctorSchema } from "@/lib/validation/doctorSchema";
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Doctor'
+ *       '400':
+ *         description: Invalid input
  */
 
 export async function GET() {

@@ -1,21 +1,13 @@
 import { NextResponse } from "next/server";
+import * as bcrypt from "bcryptjs";
 import db from "@/db";
-import { eq } from "drizzle-orm";
-import { register as registerTable } from "@/db/schemas";
-import { z } from "zod";
-import { userSignupSchema } from "@/lib/validation/userSignupSchema";
+import { users } from "@/db/schemas";
+
 /**
  * @openapi
  * /api/register:
- *   get:
- *     summary: List all register
- *     tags:
- *       - Register
- *     responses:
- *       '200':
- *         description: OK
  *   post:
- *     summary: Create a register
+ *     summary: Register a new user
  *     tags:
  *       - Register
  *     requestBody:
@@ -24,26 +16,81 @@ import { userSignupSchema } from "@/lib/validation/userSignupSchema";
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *               password:
+ *                 type: string
+ *                 format: password
+ *               name:
+ *                 type: string
  *     responses:
  *       '201':
- *         description: Created
+ *         description: User registered successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                 user:
+ *                   type: object
+ *                   properties:
+ *                     id:
+ *                       type: integer
+ *                     email:
+ *                       type: string
+ *                     name:
+ *                       type: string
+ *                     role:
+ *                       type: string
+ *       '400':
+ *         description: Invalid input
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *       '500':
+ *         description: Internal server error
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
  */
 export async function POST(request: Request) {
-  const body = await request.json();
-  const user = await db.insert(registerTable).values({
-    username: body.username,
-    email: body.email,
-    password: body.password,
-    confirmPassword: body.confirmPassword
-  }).returning().get();
+  try {
+    const { email, password, name } = await request.json();
 
-  const validation = userSignupSchema.safeParse(body);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
+    if (!email || !password) {
+      return NextResponse.json(
+        { error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = await db.insert(users).values({
+      email,
+      name,
+      password: hashedPassword,
+      role: "patient", // Default role for new registrations
+    });
+
+    return NextResponse.json({ success: true, user: newUser }, { status: 201 });
+  } catch (error) {
+    console.error(error);
+    return NextResponse.json(
+      { error: "Something went wrong" },
+      { status: 500 }
+    );
   }
-  return NextResponse.json(body);
-}
-export async function GET() {
-  const user = await db.select().from(registerTable).all();
-  return NextResponse.json(user);
 }

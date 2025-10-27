@@ -12,7 +12,24 @@ import { userAppointmentSchema } from "@/lib/validation/userAppointmentSchema";
  *       - Appointments
  *     responses:
  *       '200':
- *         description: OK
+ *         description: A list of appointments
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   date:
+ *                     type: string
+ *                   patientId:
+ *                     type: integer
+ *                   doctorId:
+ *                     type: integer
+ *                   status:
+ *                     type: string
  *   post:
  *     summary: Create an appointment
  *     tags:
@@ -23,9 +40,35 @@ import { userAppointmentSchema } from "@/lib/validation/userAppointmentSchema";
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               date:
+ *                 type: string
+ *               patientId:
+ *                 type: integer
+ *               doctorId:
+ *                 type: integer
+ *               status:
+ *                 type: string
  *     responses:
  *       '201':
- *         description: Created
+ *         description: Appointment created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 date:
+ *                   type: string
+ *                 patientId:
+ *                   type: integer
+ *                 doctorId:
+ *                   type: integer
+ *                 status:
+ *                   type: string
+ *       '400':
+ *         description: Invalid input
  */
 export async function GET() {
   const doctors = await db.select().from(appointmentsTable);

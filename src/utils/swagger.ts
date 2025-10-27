@@ -46,16 +46,89 @@ export const getApiDocs = async () => {
     ],
     components: {
       schemas: {
-        Doctor: {
-          type: 'object',
+        Patient: {
+          type: "object",
           properties: {
-            id: { type: 'string', example: '1' },
-            name: { type: 'string', example: 'Dr. John Doe' },
-            specialty: { type: 'string', example: 'Cardiology' },
+            id: { type: "integer" },
+            userId: { type: "integer" },
+            dob: { type: "string" },
+            gender: { type: "string" },
+            medicalHistory: { type: "string" },
+          },
+        },
+        Appointment: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            date: { type: "string" },
+            patientId: { type: "integer" },
+            doctorId: { type: "integer" },
+            status: { type: "string" },
+          },
+        },
+        Billing: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            patientId: { type: "integer" },
+            appointmentId: { type: "integer" },
+            amount: { type: "integer" },
+            status: { type: "string" },
+            paymentMethod: { type: "string" },
+          },
+        },
+        Prescription: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            patientId: { type: "integer" },
+            doctorId: { type: "integer" },
+            appointmentId: { type: "integer" },
+            medicineList: { type: "string" },
+            notes: { type: "string" },
+          },
+        },
+        Pharmacy: {
+          type: "object",
+          properties: {
+            id: { type: "integer" },
+            name: { type: "string" },
+            quantity: { type: "integer" },
+            price: { type: "number" },
+            expiryDate: { type: "string" },
+          },
+        },
+        Register: {
+          type: "object",
+          properties: {
+            email: { type: "string", format: "email" },
+            password: { type: "string", format: "password" },
+            name: { type: "string" },
+          },
+        },
+        Doctor: {
+          type: "object",
+          properties: {
+            userId: { type: "integer" },
+            specialization: { type: "string" },
+            fees: { type: "integer" },
+            availability: { type: "string" },
           },
         },
       },
+      securitySchemes: {
+        bearerAuth: {
+          type: "http",
+          scheme: "bearer",
+          bearerFormat: "JWT",
+        },
+      },
     },
+    security: [
+      {
+        bearerAuth: [],
+      },
+    ],
   } as const;
 
   // Allow NEXT_ROUTER_BASEPATH to inject servers entry similar to next-swagger-doc

@@ -13,7 +13,26 @@ import { prescriptionSchema } from "@/lib/validation/prescriptionSchema";
  *       - Prescriptions
  *     responses:
  *       '200':
- *         description: OK
+ *         description: A list of prescriptions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   patientId:
+ *                     type: integer
+ *                   doctorId:
+ *                     type: integer
+ *                   appointmentId:
+ *                     type: integer
+ *                   medicineList:
+ *                     type: string
+ *                   notes:
+ *                     type: string
  *   post:
  *     summary: Create a prescription
  *     tags:
@@ -24,9 +43,39 @@ import { prescriptionSchema } from "@/lib/validation/prescriptionSchema";
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               patientId:
+ *                 type: integer
+ *               doctorId:
+ *                 type: integer
+ *               appointmentId:
+ *                 type: integer
+ *               medicineList:
+ *                 type: string
+ *               notes:
+ *                 type: string
  *     responses:
  *       '201':
- *         description: Created
+ *         description: Prescription created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 patientId:
+ *                   type: integer
+ *                 doctorId:
+ *                   type: integer
+ *                 appointmentId:
+ *                   type: integer
+ *                 medicineList:
+ *                   type: string
+ *                 notes:
+ *                   type: string
+ *       '400':
+ *         description: Invalid input
  */
 export async function GET() {
   const doctors = await db.select().from(prescriptionsTable);

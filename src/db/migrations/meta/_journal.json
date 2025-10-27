@@ -8,6 +8,20 @@
       "when": 1760945036129,
       "tag": "0000_wakeful_johnny_blaze",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1761549226999,
+      "tag": "0001_flawless_wither",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1761549357207,
+      "tag": "0002_shiny_wiccan",
+      "breakpoints": true
     }
   ]
 }

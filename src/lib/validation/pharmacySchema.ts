@@ -1,8 +1,8 @@
 import {z} from 'zod';
 
-export const patientSchema = z.object({
+export const pharmacySchema = z.object({
     name : z.string(),
     expiryDate : z.string(),
-    quantity : z.int(),
-    price : z.int(),
+    quantity : z.number(),
+    price : z.number(),
 });

@@ -12,7 +12,24 @@ import { patientSchema } from "@/lib/validation/patientSchema";
  *       - Patients
  *     responses:
  *       '200':
- *         description: OK
+ *         description: A list of patients
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   userId:
+ *                     type: integer
+ *                   dob:
+ *                     type: string
+ *                   gender:
+ *                     type: string
+ *                   medicalHistory:
+ *                     type: string
  *   post:
  *     summary: Create a patient
  *     tags:
@@ -23,9 +40,35 @@ import { patientSchema } from "@/lib/validation/patientSchema";
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               userId:
+ *                 type: integer
+ *               dob:
+ *                 type: string
+ *               gender:
+ *                 type: string
+ *               medicalHistory:
+ *                 type: string
  *     responses:
  *       '201':
- *         description: Created
+ *         description: Patient created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 userId:
+ *                   type: integer
+ *                 dob:
+ *                   type: string
+ *                 gender:
+ *                   type: string
+ *                 medicalHistory:
+ *                   type: string
+ *       '400':
+ *         description: Invalid input
  */
 export async function GET() {
   const patients = await db.select().from(patientsTable);

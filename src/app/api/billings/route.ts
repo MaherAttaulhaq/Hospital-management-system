@@ -12,7 +12,26 @@ import { billingSchema } from "@/lib/validation/billingSchema";
  *       - Billings
  *     responses:
  *       '200':
- *         description: OK
+ *         description: A list of billings
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   id:
+ *                     type: integer
+ *                   patientId:
+ *                     type: integer
+ *                   appointmentId:
+ *                     type: integer
+ *                   amount:
+ *                     type: integer
+ *                   status:
+ *                     type: string
+ *                   paymentMethod:
+ *                     type: string
  *   post:
  *     summary: Create a billing record
  *     tags:
@@ -23,9 +42,39 @@ import { billingSchema } from "@/lib/validation/billingSchema";
  *         application/json:
  *           schema:
  *             type: object
+ *             properties:
+ *               patientId:
+ *                 type: integer
+ *               appointmentId:
+ *                 type: integer
+ *               amount:
+ *                 type: integer
+ *               status:
+ *                 type: string
+ *               paymentMethod:
+ *                 type: string
  *     responses:
  *       '201':
- *         description: Created
+ *         description: Billing record created
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 id:
+ *                   type: integer
+ *                 patientId:
+ *                   type: integer
+ *                 appointmentId:
+ *                   type: integer
+ *                 amount:
+ *                   type: integer
+ *                 status:
+ *                   type: string
+ *                 paymentMethod:
+ *                   type: string
+ *       '400':
+ *         description: Invalid input
  */
 export async function GET() {
   const billings = await db.select().from(billingsTable);
