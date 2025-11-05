@@ -18,17 +18,18 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 
-export type User = {
+export type patients = {
   id: string;
-  name: string;
-  email: string;
-  role: string;
+  userId: number;
+  dob: number;
+  gender: string;
+  medicalHistory: string;
 };
+const res = await fetch("/api/patients");
+const data = (await res.json()) as patients[];
 
-const res = await fetch("/api/users");
-const data = (await res.json()) as User[];
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<patients>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -52,56 +53,71 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "userId",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          User ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.getValue("userId")}</div>,
   },
   {
-    accessorKey: "email",
+    accessorKey: "dob",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          DOB
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("dob")}</div>,
   },
   {
-    accessorKey: "role",
+    accessorKey: "gender",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Role
+          Gender
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("role")}</div>,
+    cell: ({ row }) => <div>{row.getValue("gender")}</div>,
+  },
+  {
+    accessorKey: "medicalHistory",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Medical History
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div className="capitalize">{row.getValue("medicalHistory")}</div>,
   },
   {
     header: "Actions",
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const User = row.original;
+      const patient = row.original;
 
       return (
         <DropdownMenu>
@@ -114,16 +130,16 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
+              <Link href={`/dashboard/patients/${patient.id}/edit`}>Edit Patient</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
-              Delete User
+              Delete Patient
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}`}>
-                View User details
+              <Link href={`/dashboard/patients/${patient.id}`}>
+                View Patient details
               </Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -133,12 +149,12 @@ export const columns: ColumnDef<User>[] = [
   },
 ];
 
-export function UserDashboardPage() {
+export function PatientDashboardPage() {
   return (
     <>
-      <SiteHeader title="Users">
+      <SiteHeader title="Patients">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New user</Link>
+          <Link href="/dashboard/patients/create">New Patient</Link>
         </Button>
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">
@@ -147,4 +163,4 @@ export function UserDashboardPage() {
     </>
   );
 }
-export default UserDashboardPage;
+export default PatientDashboardPage;

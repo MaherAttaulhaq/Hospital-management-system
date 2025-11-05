@@ -18,17 +18,19 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 
-export type User = {
-  id: string;
-  name: string;
-  email: string;
-  role: string;
+export type Doctor = {
+  id: number;
+  userId: number;
+  specialization: string;
+  fees: number;
+  availability: string;
 };
 
-const res = await fetch("/api/users");
-const data = (await res.json()) as User[];
+const res = await fetch("/api/doctors");
+const data = (await res.json()) as Doctor[];
+console.log(data);
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<Doctor>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -52,56 +54,77 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "userId",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          User ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("userId")}</div>
+    ),
   },
   {
-    accessorKey: "email",
+    accessorKey: "specialization",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          Specialization
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("specialization")}</div>
+    ),
   },
   {
-    accessorKey: "role",
+    accessorKey: "fees",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Role
+          Fees
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("role")}</div>,
+    cell: ({ row }) => <div>{row.getValue("fees")}</div>,
+  },
+  {
+    accessorKey: "availability",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Availability
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("availability")}</div>
+    ),
   },
   {
     header: "Actions",
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const User = row.original;
+      const doctor = row.original;
 
       return (
         <DropdownMenu>
@@ -114,17 +137,13 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
+              <Link href={`/dashboard/doctors/${doctor.id}/edit`}>Edit</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              Delete User
-            </DropdownMenuItem>
+            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}`}>
-                View User details
-              </Link>
+              <Link href={`/dashboard/doctors/${doctor.id}`}>View details</Link>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
@@ -136,9 +155,9 @@ export const columns: ColumnDef<User>[] = [
 export function UserDashboardPage() {
   return (
     <>
-      <SiteHeader title="Users">
+      <SiteHeader title="Doctors">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New user</Link>
+          <Link href="/dashboard/users/create">New doctor</Link>
         </Button>
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">

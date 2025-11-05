@@ -70,10 +70,10 @@ export async function GET(
     .from(prescriptionsTable)
     .where(eq(prescriptionsTable.id, parseInt(id)))
     .get();
-  const validation = prescriptionSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
+  // const validation = prescriptionSchema.safeParse(id);
+  // if (!validation.success) {
+  //   return NextResponse.json(validation.error.format(), { status: 400 });
+  // }
   if (!patient) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }

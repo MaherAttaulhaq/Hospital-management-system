@@ -69,10 +69,10 @@ export async function GET(
     .from(appointmentsTable)
     .where(eq(appointmentsTable.id, parseInt(id)))
     .get();
-  const validation = userAppointmentSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
+  // const validation = userAppointmentSchema.safeParse(id);
+  // if (!validation.success) {
+  //   return NextResponse.json(validation.error.format(), { status: 400 });
+  // }
   if (!appointments) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }

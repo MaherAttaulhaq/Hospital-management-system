@@ -10,6 +10,7 @@ import {
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { CreditCard, SquarePen } from "lucide-react";
 import { NextPage } from "next";
+import { da } from "zod/v4/locales";
 
 interface Props {
   params: { id: string };
@@ -17,17 +18,19 @@ interface Props {
 
 const Page: NextPage<Props> = async ({ params }) => {
   // Mock data to populate the card
+  
   const { id } = await params;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${id}`);
+  const res = await fetch(
+    `${process.env.NEXT_PUBLIC_API_URL}/api/patients/${id}`
+  );
   const data = await res.json();
-
   return (
-    <div className="p-8 max-w-lg mx-auto mt-10">
+    <div className="p-8 max-w-lg mx-auto">
       <Card>
         {/* Card Header */}
         <CardHeader>
           <CardTitle>Order {data.id}</CardTitle>
-          <CardDescription>Name is {data.name}</CardDescription>
+          <CardDescription>Placed on {data.dob}</CardDescription>
         </CardHeader>
 
         {/* Card Content */}
@@ -40,9 +43,9 @@ const Page: NextPage<Props> = async ({ params }) => {
               <h3 className="font-medium text-gray-900">
                 Customer Information
               </h3>
-              <p className="text-gray-500 text-sm">{data.name}</p>
-              <p className="text-gray-500 text-sm">{data.email}</p>
-              <p className="text-gray-500 text-sm">{data.role}</p>
+              <p className="text-gray-500 text-sm">{data.userId}</p>
+              <p className="text-gray-500 text-sm">{data.gender}</p>
+              <p className="text-gray-500 text-sm">{data.medicalHistory}</p>
             </div>
           </div>
 
@@ -55,12 +58,12 @@ const Page: NextPage<Props> = async ({ params }) => {
                   className="size-4 text-gray-400"
                   aria-hidden="true"
                 />
-                {data.role}
+                {data.userId}
               </div>
             </div>
             <Button variant="outline" className="shrink-0">
               <SquarePen className="size-4" aria-hidden="true" />
-              <span className="sr-only">Edit</span>
+              <span className="sr-only">Edit Payment Method</span>
             </Button>
           </div>
         </CardContent>

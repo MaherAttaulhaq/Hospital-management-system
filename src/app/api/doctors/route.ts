@@ -56,6 +56,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const data = await req.json();
+  const validation = doctorSchema.safeParse(data);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   const doctor = await db
     .insert(doctorsTable)
     .values({
@@ -66,10 +70,6 @@ export async function POST(req: Request) {
     })
     .returning()
     .get();
-  const validation = doctorSchema.safeParse(data);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
 
   return NextResponse.json(doctor, { status: 201 });
 }

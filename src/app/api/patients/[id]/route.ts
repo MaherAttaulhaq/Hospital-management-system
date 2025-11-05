@@ -64,16 +64,19 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  console.log(params);
+    
   const { id } = params;
+  
   const patients = await db
     .select()
     .from(patientsTable)
     .where(eq(patientsTable.id, parseInt(id)))
     .get();
-      const validation = patientSchema.safeParse(id);
-      if (!validation.success) {
-        return NextResponse.json(validation.error.format(), { status: 400 });
-      }
+      // const validation = patientSchema.safeParse(id);
+      // if (!validation.success) {
+      //   return NextResponse.json(validation.error.format(), { status: 400 });
+      // }
   if (!patients) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }

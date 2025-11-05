@@ -1,15 +1,15 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
-import { doctors as doctorsTable } from "@/db/schemas";
+import { users as usersTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
-import { doctorSchema } from "@/lib/validation/doctorSchema";
+import { userSchema } from "@/lib/validation/userSchema";
 /**
  * @openapi
- * /api/doctors/{id}:
+ * /api/users/{id}:
  *   get:
- *     summary: Get a doctor by ID
+ *     summary: Get a user by ID
  *     tags:
- *       - Doctors
+ *       - Users
  *     parameters:
  *       - in: path
  *         name: id
@@ -26,9 +26,9 @@ import { doctorSchema } from "@/lib/validation/doctorSchema";
  *       '404':
  *         description: Not found
  *   put:
- *     summary: Update a doctor
+ *     summary: Update a users
  *     tags:
- *       - Doctors
+ *       - Users
  *     parameters:
  *       - in: path
  *         name: id
@@ -45,9 +45,9 @@ import { doctorSchema } from "@/lib/validation/doctorSchema";
  *       '200':
  *         description: Updated
  *   delete:
- *     summary: Delete a doctor
+ *     summary: Delete a patient
  *     tags:
- *       - Doctors
+ *       - user
  *     parameters:
  *       - in: path
  *         name: id
@@ -68,44 +68,42 @@ export async function GET(
   // if (isNaN(parseInt(id))) {
   //   return NextResponse.json({ error: "Invalid ID", status: 400 });
   // }
-  // const validation = doctorSchema.safeParse(id);
-  // if (!validation.success) {
-  //   return NextResponse.json(validation.error.format(), { status: 400 });
-  // }
-  const doctor = await db
+  const user = await db
     .select()
-    .from(doctorsTable)
-    .where(eq(doctorsTable.id, parseInt(id)))
+    .from(usersTable)
+    .where(eq(usersTable.id, parseInt(id)))
     .get();
 
-  if (!doctor) {
+  if (!user) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }
-  return NextResponse.json(doctor);
+  return NextResponse.json(user);
 }
-
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
   const body = await req.json();
-  const { id } = await params;
-  const updated = await db
-    .update(doctorsTable)
-    .set({
-      userId: body.user_id,
-      specialization: body.specialization,
-      fees: body.fees,
-      availability: body.availability,
-    })
-    .where(eq(doctorsTable.id, parseInt(id)))
-    .returning()
-    .get();
-  const validation = doctorSchema.safeParse(id);
+  const { id } = params;
+  const validation = userSchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
+  const updated = await db
+    .update(usersTable)
+    .set({
+      id: body.id,
+      name: body.name,
+      email: body.email,
+      password: body.password,
+      role: body.role,
+    })
+    .where(eq(usersTable.id, parseInt(id)))
+    .returning()
+    .get();
+
   if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
+
   return NextResponse.json(updated);
 }
 
@@ -114,11 +112,11 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const ok = await db
-    .delete(doctorsTable)
-    .where(eq(doctorsTable.id, parseInt(params.id)))
+    .delete(usersTable)
+    .where(eq(usersTable.id, parseInt(params.id)))
     .returning()
     .get();
-  const validation = doctorSchema.safeParse(params.id);
+  const validation = userSchema.safeParse(params.id);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }

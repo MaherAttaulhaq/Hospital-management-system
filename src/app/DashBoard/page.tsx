@@ -1,26 +1,21 @@
-import { AppSidebar } from "@/components/app-sidebar";
+
 import { ChartAreaInteractive } from "@/components/chart-area-interactive";
 import { DataTable } from "@/components/data-table";
 import { SectionCards } from "@/components/section-cards";
 import { SiteHeader } from "@/components/site-header";
-import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
+
 
 import data from "./data.json";
 import { Button } from "@/components/ui/button";
 
+import { ModeToggle } from "@/components/ui/mode-toggle";
+
 export default function Page() {
   return (
-    <>
+    <div>
       <SiteHeader title="Dashboard">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <a
-            href="https://github.com/shadcn-ui/ui/tree/main/apps/v4/app/(examples)/dashboard"
-            rel="noopener noreferrer"
-            target="_blank"
-            className="dark:text-foreground"
-          >
-            GitHub
-          </a>
+          <ModeToggle />
         </Button>
       </SiteHeader>
       <div className="flex flex-1 flex-col">
@@ -34,6 +29,6 @@ export default function Page() {
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }

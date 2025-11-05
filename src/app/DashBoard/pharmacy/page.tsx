@@ -18,17 +18,18 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 
-export type User = {
+export type Pharmacy = {
   id: string;
   name: string;
-  email: string;
-  role: string;
+  quantity: number;
+  expiryDate: number;
+  price: number;
 };
+const res = await fetch("/api/pharmacy");
+const data = (await res.json()) as Pharmacy[];
 
-const res = await fetch("/api/users");
-const data = (await res.json()) as User[];
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<Pharmacy>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -67,41 +68,56 @@ export const columns: ColumnDef<User>[] = [
     cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "email",
+    accessorKey: "quantity",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          Quantity
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("quantity")}</div>,
   },
   {
-    accessorKey: "role",
+    accessorKey: "price",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Role
+          Price
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("role")}</div>,
+    cell: ({ row }) => <div>{row.getValue("price")}</div>,
+  },
+  {
+    accessorKey: "expiryDate",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Expiry Date
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div className="capitalize">{row.getValue("expiryDate")}</div>,
   },
   {
     header: "Actions",
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const User = row.original;
+      const pharmacy = row.original;
 
       return (
         <DropdownMenu>
@@ -114,7 +130,7 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
+              <Link href={`/dashboard/pharmacy/${pharmacy.id}/edit`}>Edit User</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
@@ -122,7 +138,7 @@ export const columns: ColumnDef<User>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}`}>
+              <Link href={`/dashboard/pharmacy/${pharmacy.id}`}>
                 View User details
               </Link>
             </DropdownMenuItem>

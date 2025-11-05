@@ -70,10 +70,10 @@ export async function GET(
     .from(billingsTable)
     .where(eq(billingsTable.id, parseInt(id)))
     .get();
-  const validation = billingSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
+  // const validation = billingSchema.safeParse(id);
+  // if (!validation.success) {
+  //   return NextResponse.json(validation.error.format(), { status: 400 });
+  // }
   if (!doctor) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }

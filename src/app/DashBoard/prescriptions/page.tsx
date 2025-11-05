@@ -17,18 +17,20 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
-
-export type User = {
+import { prescriptions } from "@/db/schemas";
+export type prescriptions = {
   id: string;
-  name: string;
-  email: string;
-  role: string;
+  appointmentId: string;
+  doctorId: string;
+  patientId: string;
+  medicineList: string;
+  notes: string;
 };
+const res = await fetch("/api/prescriptions");
+const data = (await res.json()) as prescriptions[];
 
-const res = await fetch("/api/users");
-const data = (await res.json()) as User[];
 
-export const columns: ColumnDef<User>[] = [
+export const columns: ColumnDef<prescriptions>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -52,56 +54,86 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "appointmentId",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
+          Appointment ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    cell: ({ row }) => <div className="capitalize">{row.getValue("appointmentId")}</div>,
   },
   {
-    accessorKey: "email",
+    accessorKey: "doctorId",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Email
+          Doctor ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("email")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("doctorId")}</div>,
   },
   {
-    accessorKey: "role",
+    accessorKey: "patientId",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Role
+          Patient ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("role")}</div>,
+    cell: ({ row }) => <div>{row.getValue("patientId")}</div>,
+  },
+  {
+    accessorKey: "medicineList",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Medicine List
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div className="capitalize">{row.getValue("medicineList")}</div>,
+  },
+  {
+    accessorKey: "notes",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Notes
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div className="capitalize">{row.getValue("notes")}</div>,
   },
   {
     header: "Actions",
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const User = row.original;
+      const prescription = row.original;
 
       return (
         <DropdownMenu>
@@ -114,7 +146,7 @@ export const columns: ColumnDef<User>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
+              <Link href={`/dashboard/prescriptions/${prescription.id}/edit`}>Edit User</Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive">
@@ -122,7 +154,7 @@ export const columns: ColumnDef<User>[] = [
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}`}>
+              <Link href={`/dashboard/prescriptions/${prescription.id}`}>
                 View User details
               </Link>
             </DropdownMenuItem>
