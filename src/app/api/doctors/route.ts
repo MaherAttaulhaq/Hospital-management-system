@@ -63,7 +63,7 @@ export async function POST(req: Request) {
   const doctor = await db
     .insert(doctorsTable)
     .values({
-      userId: data.user_id,
+      userId: data.userId,
       specialization: data.specialization,
       fees: data.fees,
       availability: data.availability,

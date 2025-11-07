@@ -89,11 +89,16 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const body = await req.json();
-  const { id } = await params;
+  const validation = doctorSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
+
+  const { id } = params;
   const updated = await db
     .update(doctorsTable)
     .set({
-      userId: body.user_id,
+      userId: body.userId,
       specialization: body.specialization,
       fees: body.fees,
       availability: body.availability,
@@ -101,11 +106,11 @@ export async function PUT(
     .where(eq(doctorsTable.id, parseInt(id)))
     .returning()
     .get();
-  const validation = doctorSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
+
+  if (!updated) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
   }
-  if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
+
   return NextResponse.json(updated);
 }
 

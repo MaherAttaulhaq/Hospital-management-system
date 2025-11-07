@@ -1,9 +1,10 @@
-import {z} from 'zod';
+import { z } from 'zod';
 
 export const prescriptionSchema = z.object({
-    appointmentId : z.int(),
-    doctorId : z.int(),
-    patientId : z.int(),
-    medicineList : z.string(),
-    notes : z.string(),
+  userId: z.number().positive({ message: 'Please select a user.' }),
+  patientId: z.number().positive({ message: 'Please select a patient.' }),
+  doctorId: z.number().positive({ message: 'Please select a doctor.' }),
+  appointmentId: z.number().positive({ message: 'Please select an appointment.' }),
+  medicinelist: z.string().min(1, { message: 'Please enter a medication.' }),
+  notes: z.string().optional(),
 });

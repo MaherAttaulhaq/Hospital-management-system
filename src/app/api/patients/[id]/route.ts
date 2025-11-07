@@ -87,7 +87,11 @@ export async function PUT(
   { params }: { params: { id: string } }
 ) {
   const body = await req.json();
-  console.log(body);
+  const validation = patientSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
+
   const { id } = params;
   const updated = await db
     .update(patientsTable)
@@ -101,11 +105,10 @@ export async function PUT(
     .returning()
     .get();
 
-  if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
-    const validation = patientSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(validation.error.format(), { status: 400 });
-    }
+  if (!updated) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
   return NextResponse.json(updated);
 }
 
