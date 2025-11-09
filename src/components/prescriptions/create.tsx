@@ -15,11 +15,12 @@ import {
 import { Combobox } from "../ui/comboboxDemo";
 import { Input } from "../ui/input";
 import { prescriptionSchema } from "@/lib/validation/prescriptionSchema";
-
-const Create = () => {
-  const [users, setUsers] = useState<{ label: string; value: string }[]>(
-    []
-  );
+import { prescriptions } from "@/db/schemas";
+interface prescriptionFormProps {
+  prescription?: z.infer<typeof prescriptionSchema> & { id: number };
+}
+const Create = ({ prescription }: prescriptionFormProps) => {
+  const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
   const [patients, setPatients] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -31,24 +32,12 @@ const Create = () => {
   >([]);
 
   useEffect(() => {
-    const fetchUsers = async () => {
-      const res = await fetch("/api/users");
-      const data = await res.json();
-      const formattedUsers = data.map(
-        (user: { id: number; name: string }) => ({
-          label: user.name,
-          value: user.id.toString(),
-        })
-      );
-      setUsers(formattedUsers);
-    };
-
     const fetchPatients = async () => {
       const res = await fetch("/api/patients");
       const data = await res.json();
       const formattedPatients = data.map(
         (patient: { id: number; name: string }) => ({
-          label: patient.name,
+          label: patient.id,
           value: patient.id.toString(),
         })
       );
@@ -60,7 +49,7 @@ const Create = () => {
       const data = await res.json();
       const formattedDoctors = data.map(
         (doctor: { id: number; name: string }) => ({
-          label: doctor.name,
+          label: doctor.id,
           value: doctor.id.toString(),
         })
       );
@@ -72,14 +61,13 @@ const Create = () => {
       const data = await res.json();
       const formattedAppointments = data.map(
         (appointment: { id: number; date: string }) => ({
-          label: new Date(appointment.date).toLocaleDateString(),
+          label: appointment.id,
           value: appointment.id.toString(),
         })
       );
       setAppointments(formattedAppointments);
     };
 
-    fetchUsers();
     fetchPatients();
     fetchDoctors();
     fetchAppointments();
@@ -87,27 +75,35 @@ const Create = () => {
 
   const form = useForm<z.infer<typeof prescriptionSchema>>({
     resolver: zodResolver(prescriptionSchema),
-    defaultValues: {
+    defaultValues: prescription || {
       userId: undefined,
       patientId: undefined,
       doctorId: undefined,
       appointmentId: undefined,
-      medicinelist: "",
+      medicineList: "",
       notes: "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof prescriptionSchema>) {
-    const method = "POST";
-    const url = "/api/prescriptions";
+  async function onSubmit(values: z.infer<typeof prescriptionSchema>) {
+    let method = "";
+    let url = "";
 
-    const response = fetch(url, {
+    if (prescriptions?.id) {
+      method = "PUT";
+      url = `/api/prescriptions/${prescriptions.id}`;
+    } else {
+      method = "POST";
+      url = "/api/prescriptions";
+    }
+    const response = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
     });
+
     console.log(response);
   }
 
@@ -116,34 +112,10 @@ const Create = () => {
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
         <FormField
           control={form.control}
-          name="userId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>User</FormLabel>
-              <FormControl>
-                <Combobox
-                  options={users}
-                  onChange={(value) => {
-                    const parsedValue = parseInt(value, 10);
-                    if (!isNaN(parsedValue)) {
-                      field.onChange(parsedValue);
-                    } else {
-                      field.onChange(undefined);
-                    }
-                  }}
-                  value={field.value?.toString() || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
-        <FormField
-          control={form.control}
           name="patientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Patient</FormLabel>
+              <FormLabel>Patient Id</FormLabel>
               <FormControl>
                 <Combobox
                   options={patients}
@@ -167,7 +139,7 @@ const Create = () => {
           name="doctorId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Doctor</FormLabel>
+              <FormLabel>Doctor Id</FormLabel>
               <FormControl>
                 <Combobox
                   options={doctors}
@@ -191,7 +163,7 @@ const Create = () => {
           name="appointmentId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Appointment</FormLabel>
+              <FormLabel>Appointment Id</FormLabel>
               <FormControl>
                 <Combobox
                   options={appointments}
@@ -212,7 +184,7 @@ const Create = () => {
         />
         <FormField
           control={form.control}
-          name="medicinelist"
+          name="medicineList"
           render={({ field }) => (
             <FormItem>
               <FormLabel>MedicineList</FormLabel>
@@ -237,7 +209,7 @@ const Create = () => {
           )}
         />
         <Button type="submit" className="w-full">
-          Create Prescription
+          {prescription ? "Update Prescription" : "Create Prescription"}
         </Button>
       </form>
     </Form>

@@ -15,11 +15,15 @@ import {
 import { Combobox } from "../ui/comboboxDemo";
 import { Input } from "../ui/input";
 import { billingSchema } from "@/lib/validation/billingSchema";
+import { billing } from "@/db/schemas";
 
-const Create = () => {
-  const [users, setUsers] = useState<{ label: string; value: string }[]>(
-    []
-  );
+interface billingFormProps {
+  billing?: z.infer<typeof billingSchema> & { id: number };
+}
+const CreateForm: React.FC<billingFormProps> = ({ billing }) => {
+  console.log(billing);
+  
+  const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
   const [patients, setPatients] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -31,12 +35,10 @@ const Create = () => {
     const fetchUsers = async () => {
       const res = await fetch("/api/users");
       const data = await res.json();
-      const formattedUsers = data.map(
-        (user: { id: number; name: string }) => ({
-          label: user.name,
-          value: user.id.toString(),
-        })
-      );
+      const formattedUsers = data.map((user: { id: number; name: string }) => ({
+        label: user.name,
+        value: user.id.toString(),
+      }));
       setUsers(formattedUsers);
     };
 
@@ -71,7 +73,7 @@ const Create = () => {
 
   const form = useForm<z.infer<typeof billingSchema>>({
     resolver: zodResolver(billingSchema),
-    defaultValues: {
+    defaultValues: billing ||{
       userId: undefined,
       patientId: undefined,
       appointmentId: undefined,
@@ -81,54 +83,38 @@ const Create = () => {
     },
   });
 
-  function onSubmit(values: z.infer<typeof billingSchema>) {
-    const method = "POST";
-    const url = "/api/billings";
+  async function onSubmit(values: z.infer<typeof billingSchema>) {
+    let method = "";
+    let url = "";
 
-    const response = fetch(url, {
+    if (billing?.id) {
+      method = "PUT";
+      url = `/api/billings/${billing.id}`;
+    } else {
+      method = "POST";
+      url = "/api/billings";
+    }
+    const response = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
-    })
+    });
+
     console.log(response);
-    
   }
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="userId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>User</FormLabel>
-              <FormControl>
-                <Combobox
-                  options={users}
-                  onChange={(value) => {
-                    const parsedValue = parseInt(value, 10);
-                    if (!isNaN(parsedValue)) {
-                      field.onChange(parsedValue);
-                    } else {
-                      field.onChange(undefined);
-                    }
-                  }}
-                  value={field.value?.toString() || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
+
         <FormField
           control={form.control}
           name="patientId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Patient</FormLabel>
+              <FormLabel>Patient Id</FormLabel>
               <FormControl>
                 <Combobox
                   options={patients}
@@ -152,7 +138,7 @@ const Create = () => {
           name="appointmentId"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Appointment</FormLabel>
+              <FormLabel>Appointment Id</FormLabel>
               <FormControl>
                 <Combobox
                   options={appointments}
@@ -238,11 +224,11 @@ const Create = () => {
           )}
         />
         <Button type="submit" className="w-full">
-          Create Billing
+          {billing ? "Update billing" : "Create billing"}
         </Button>
       </form>
     </Form>
   );
 };
 
-export default Create;
+export default CreateForm;

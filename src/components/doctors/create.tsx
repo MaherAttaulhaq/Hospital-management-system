@@ -15,12 +15,15 @@ import {
 import { Combobox } from "../ui/comboboxDemo";
 import { Input } from "../ui/input";
 import { doctorSchema } from "@/lib/validation/doctorSchema";
+import { doctors } from "@/db/schemas";
 
 interface DoctorFormProps {
   doctor?: z.infer<typeof doctorSchema> & { id: number };
 }
 
-const DoctorForm: React.FC<DoctorFormProps> = ({ doctor }) => {
+
+const DoctorForm: React.FC<DoctorFormProps> = ({ doctor }) => { 
+  console.log(doctor); 
   const [doctors, setDoctors] = useState<{ label: string; value: string }[]>(
     []
   );
@@ -57,9 +60,16 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor }) => {
   }, [doctor, form]);
 
   async function onSubmit(values: z.infer<typeof doctorSchema>) {
-    const method = "POST";
-    const url = "/api/doctors";
+    let method = "";
+    let url = "";
 
+    if (doctor?.id) {
+      method = "PUT";
+      url = `/api/doctors/${doctor.id}`;
+    } else {
+      method = "POST";
+      url = "/api/doctors";
+    }
     const response = await fetch(url, {
       method,
       headers: {
@@ -67,6 +77,7 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor }) => {
       },
       body: JSON.stringify(values),
     });
+
     console.log(response);
   }
 
@@ -134,7 +145,8 @@ const DoctorForm: React.FC<DoctorFormProps> = ({ doctor }) => {
                   className="border rounded-md p-2 text-black border-gray-300 bg-blue-100"
                   {...field}
                 >
-                  <option value="anesthesia">anesthesia</option>                  <option value="dermatology">dermatoloy</option>
+                  <option value="anesthesia">anesthesia</option>{" "}
+                  <option value="dermatology">dermatoloy</option>
                   <option value="dentistry">dentistry</option>
                 </select>
               </FormControl>

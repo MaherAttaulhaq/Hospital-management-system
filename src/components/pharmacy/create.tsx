@@ -15,8 +15,12 @@ import {
 import { Combobox } from "../ui/comboboxDemo";
 import { Input } from "../ui/input";
 import { pharmacySchema } from "@/lib/validation/pharmacySchema";
+import { pharmacy } from "@/db/schemas";
 
-const CreatePharmacyItemForm = () => {
+interface pharmacyFormProps {
+  pharmacy?: z.infer<typeof pharmacySchema> & { id: number };
+}
+const CreatePharmacyItemForm = ({ pharmacy }: pharmacyFormProps) => {
   const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
@@ -36,25 +40,33 @@ const CreatePharmacyItemForm = () => {
   const form = useForm<z.infer<typeof pharmacySchema>>({
     resolver: zodResolver(pharmacySchema),
     defaultValues: {
-      userId: undefined,
-      name: "",
-      quantity: undefined,
-      price: undefined,
-      expiryDate: "",
+      userId: pharmacy?.userId || undefined,
+      name: pharmacy?.name || "",
+      quantity: pharmacy?.quantity || undefined,
+      price: pharmacy?.price || undefined,
+      expiryDate: pharmacy?.expiryDate || "",
     },
   });
 
-  function onSubmit(values: z.infer<typeof pharmacySchema>) {
-    const method = "POST";
-    const url = "/api/pharmacy";
+  async function onSubmit(values: z.infer<typeof pharmacySchema>) {
+   let method = "";
+    let url = "";
 
-    const response = fetch(url, {
+    if (pharmacy?.id) {
+      method = "PUT";
+      url = `/api/pharmacy/${pharmacy.id}`;
+    } else {
+      method = "POST";
+      url = "/api/pharmacy";
+    }
+    const response = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
     });
+
     console.log(response);
   }
 
@@ -154,7 +166,7 @@ const CreatePharmacyItemForm = () => {
           )}
         />
         <Button type="submit" className="w-full">
-          Create Item
+          {pharmacy ? "Update Pharmacy Item" : "Create Pharmacy Item"}
         </Button>
       </form>
     </Form>

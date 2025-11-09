@@ -5,6 +5,6 @@ export const prescriptionSchema = z.object({
   patientId: z.number().positive({ message: 'Please select a patient.' }),
   doctorId: z.number().positive({ message: 'Please select a doctor.' }),
   appointmentId: z.number().positive({ message: 'Please select an appointment.' }),
-  medicinelist: z.string().min(1, { message: 'Please enter a medication.' }),
+  medicineList: z.string().min(1, { message: 'Please enter a medication.' }),
   notes: z.string().optional(),
 });

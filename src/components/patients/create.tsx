@@ -17,21 +17,20 @@ import { Input } from "../ui/input";
 
 import { patientSchema } from "@/lib/validation/patientSchema";
 
-const Create = () => {
-  const [users, setUsers] = useState<{ label: string; value: string }[]>(
-    []
-  );
+interface patientFormProps {
+  patient?: z.infer<typeof patientSchema> & { id: number };
+}
+const CreateForm: React.FC<patientFormProps> = ({ patient }) => {
+  const [users, setUsers] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
     const fetchUsers = async () => {
       const res = await fetch("/api/users");
       const data = await res.json();
-      const formattedUsers = data.map(
-        (user: { id: number; name: string }) => ({
-          label: user.name,
-          value: user.id.toString(),
-        })
-      );
+      const formattedUsers = data.map((user: { id: number; name: string }) => ({
+        label: user.name,
+        value: user.id.toString(),
+      }));
       setUsers(formattedUsers);
     };
     fetchUsers();
@@ -39,7 +38,7 @@ const Create = () => {
 
   const form = useForm<z.infer<typeof patientSchema>>({
     resolver: zodResolver(patientSchema),
-    defaultValues: {
+    defaultValues: patient || {
       userId: undefined,
       dob: "",
       gender: "male",
@@ -47,19 +46,28 @@ const Create = () => {
     },
   });
   // 2. Define a submit handler.
-  function onSubmit(values: z.infer<typeof patientSchema>) {
-    const method = "POST";
-    const url = "/api/patients";
+  async function onSubmit(values: z.infer<typeof patientSchema>) {
+    let method = "";
+    let url = "";
 
-    const response = fetch(url, {
+    if (patient?.id) {
+      method = "PUT";
+      url = `/api/patients/${patient.id}`;
+    } else {
+      method = "POST";
+      url = "/api/patients";
+    }
+    const response = await fetch(url, {
       method,
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify(values),
     });
+
     console.log(response);
   }
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
@@ -98,7 +106,9 @@ const Create = () => {
                   className="border rounded-md p-2 text-black border-gray-300 bg-blue-100"
                   {...field}
                 >
-                  <option value="Select Gender" disabled>Select Gender</option>
+                  <option value="Select Gender" disabled>
+                    Select Gender
+                  </option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
@@ -134,10 +144,12 @@ const Create = () => {
             </FormItem>
           )}
         />
-        <Button type="submit" className="w-full">Create Patient</Button>
+        <Button type="submit" className="w-full">
+          {patient ? "Update patient" : "Create patient"}
+        </Button>
       </form>
     </Form>
   );
 };
 
-export default Create;
+export default CreateForm;
