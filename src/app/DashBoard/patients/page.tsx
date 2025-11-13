@@ -17,6 +17,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
+import AppModal from "@/components/app-modal";
 
 export type patients = {
   id: string;
@@ -25,9 +26,6 @@ export type patients = {
   gender: string;
   medicalHistory: string;
 };
-const res = await fetch("/api/patients");
-const data = (await res.json()) as patients[];
-
 
 export const columns: ColumnDef<patients>[] = [
   {
@@ -65,7 +63,9 @@ export const columns: ColumnDef<patients>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("userId")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("userId")}</div>
+    ),
   },
   {
     accessorKey: "dob",
@@ -110,7 +110,9 @@ export const columns: ColumnDef<patients>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("medicalHistory")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("medicalHistory")}</div>
+    ),
   },
   {
     header: "Actions",
@@ -118,38 +120,82 @@ export const columns: ColumnDef<patients>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const patient = row.original;
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+      const handleDelete = async () => {
+        try {
+          const res = await fetch(`/api/patients/${patient.id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            console.log("Patient deleted successfully");
+            setIsModalOpen(false);
+            window.location.reload();
+          } else {
+            console.error("Failed to delete patient");
+            setIsModalOpen(false);
+          }
+        } catch (error) {
+          console.error("Error deleting patient:", error);
+          setIsModalOpen(false);
+        }
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/patients/${patient.id}/edit`}>Edit Patient</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              Delete Patient
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/patients/${patient.id}`}>
-                View Patient details
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <AppModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleDelete}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/patients/${patient.id}/edit`}>
+                  Edit Patient
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => {
+                  setIsModalOpen(true);
+                }}
+              >
+                Delete Patient
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/patients/${patient.id}`}>
+                  View Patient details
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       );
     },
   },
 ];
 
 export function PatientDashboardPage() {
+  const [data, setData] = React.useState<patients[]>([]);
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/patients");
+      const fetchedData = (await res.json()) as patients[];
+      setData(fetchedData);
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       <SiteHeader title="Patients">

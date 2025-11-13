@@ -118,15 +118,16 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "Not found", status: 404 });
+  }
+
   const ok = await db
     .delete(doctorsTable)
-    .where(eq(doctorsTable.id, parseInt(params.id)))
+    .where(eq(doctorsTable.id, parseInt(id)))
     .returning()
     .get();
-  const validation = doctorSchema.safeParse(params.id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

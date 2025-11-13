@@ -64,19 +64,17 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  console.log(params);
-    
-  const { id } = params;
-  
+  const { id } = await params;
+  const validation = patientSchema.safeParse(id);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   const patients = await db
     .select()
     .from(patientsTable)
     .where(eq(patientsTable.id, parseInt(id)))
     .get();
-      // const validation = patientSchema.safeParse(id);
-      // if (!validation.success) {
-      //   return NextResponse.json(validation.error.format(), { status: 400 });
-      // }
+
   if (!patients) {
     return NextResponse.json({ error: "Not found", status: 404 });
   }
@@ -92,7 +90,7 @@ export async function PUT(
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
 
-  const { id } = params;
+  const { id } = await params;
   const updated = await db
     .update(patientsTable)
     .set({
@@ -116,15 +114,20 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
+    if (!id) {
+    return NextResponse.json({ error: "Not found", status: 404 });
+  }
+  // const validation = patientSchema.safeParse(id);
+  // if (!validation.success) {
+  //   return NextResponse.json(validation.error.format(), { status: 400 });
+  // }
   const ok = await db
     .delete(patientsTable)
     .where(eq(patientsTable.id, parseInt(params.id)))
     .returning()
     .get();
-      const validation = patientSchema.safeParse(params.id);
-      if (!validation.success) {
-        return NextResponse.json(validation.error.format(), { status: 400 });
-      }
+
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

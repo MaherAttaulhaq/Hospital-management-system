@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
-import { pharmacy as pharmacyTable } from "@/db/schemas";
+import { pharmacy, pharmacy as pharmacyTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import { patientSchema } from "@/lib/validation/patientSchema";
+import { pharmacySchema } from "@/lib/validation/pharmacySchema";
 /**
  * @openapi
  * /api/pharmacy/{id}:
@@ -26,7 +27,7 @@ import { patientSchema } from "@/lib/validation/patientSchema";
  *       '404':
  *         description: Not found
  *   put:
- *     summary: Update a pharmacy 
+ *     summary: Update a pharmacy
  *     tags:
  *       - Pharmacy
  *     parameters:
@@ -63,7 +64,7 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = params;
+  const { id } = await params;
   const patient = await db
     .select()
     .from(pharmacyTable)
@@ -95,10 +96,10 @@ export async function PUT(
     .where(eq(pharmacyTable.id, parseInt(id)))
     .returning()
     .get();
-    const validation = patientSchema.safeParse(body);
-    if (!validation.success) {
-      return NextResponse.json(validation.error.format(), { status: 400 });
-    }
+  const validation = pharmacySchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
   return NextResponse.json(updated);
 }
@@ -107,16 +108,15 @@ export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "Not found", status: 404 });
+  }
   const ok = await db
     .delete(pharmacyTable)
     .where(eq(pharmacyTable.id, parseInt(params.id)))
     .returning()
     .get();
-  const validation = patientSchema.safeParse(params.id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }
-

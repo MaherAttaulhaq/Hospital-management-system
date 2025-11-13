@@ -18,6 +18,7 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import { prescriptions } from "@/db/schemas";
+import { useEffect , useState} from "react";
 export type prescriptions = {
   id: string;
   appointmentId: string;
@@ -26,9 +27,6 @@ export type prescriptions = {
   medicineList: string;
   notes: string;
 };
-const res = await fetch("/api/prescriptions");
-const data = (await res.json()) as prescriptions[];
-
 
 export const columns: ColumnDef<prescriptions>[] = [
   {
@@ -66,7 +64,9 @@ export const columns: ColumnDef<prescriptions>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("appointmentId")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("appointmentId")}</div>
+    ),
   },
   {
     accessorKey: "doctorId",
@@ -81,7 +81,9 @@ export const columns: ColumnDef<prescriptions>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("doctorId")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("doctorId")}</div>
+    ),
   },
   {
     accessorKey: "patientId",
@@ -111,7 +113,9 @@ export const columns: ColumnDef<prescriptions>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("medicineList")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("medicineList")}</div>
+    ),
   },
   {
     accessorKey: "notes",
@@ -126,7 +130,9 @@ export const columns: ColumnDef<prescriptions>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("notes")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("notes")}</div>
+    ),
   },
   {
     header: "Actions",
@@ -134,6 +140,26 @@ export const columns: ColumnDef<prescriptions>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const prescription = row.original;
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+      const handleDelete = async () => {
+        try {
+          const res = await fetch(`/api/prescriptions/${prescription.id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            console.log("prescription deleted successfully");
+            setIsModalOpen(false);
+            window.location.reload();
+          } else {
+            console.error("Failed to delete prescription");
+            setIsModalOpen(false);
+          }
+        } catch (error) {
+          console.error("Error deleting prescription:", error);
+          setIsModalOpen(false);
+        }
+      };
 
       return (
         <DropdownMenu>
@@ -146,10 +172,12 @@ export const columns: ColumnDef<prescriptions>[] = [
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             <DropdownMenuItem asChild>
-              <Link href={`/dashboard/prescriptions/${prescription.id}/edit`}>Edit User</Link>
+              <Link href={`/dashboard/prescriptions/${prescription.id}/edit`}>
+                Edit User
+              </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
+            <DropdownMenuItem variant="destructive" onClick={() => setIsModalOpen(true)}>
               Delete User
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -166,6 +194,16 @@ export const columns: ColumnDef<prescriptions>[] = [
 ];
 
 export function UserDashboardPage() {
+  const [data, setData] = useState<prescriptions[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/prescriptions");
+      const data = (await res.json()) as prescriptions[];
+      setData(data);
+    };
+    fetchData();
+  }, []);
   return (
     <>
       <SiteHeader title="Users">

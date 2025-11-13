@@ -17,6 +17,8 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
+import AppModal from "@/components/app-modal";
+import { useEffect, useState } from "react";
 
 export type Doctor = {
   id: number;
@@ -25,10 +27,6 @@ export type Doctor = {
   fees: number;
   availability: string;
 };
-
-const res = await fetch("/api/doctors");
-const data = (await res.json()) as Doctor[];
-console.log(data);
 
 export const columns: ColumnDef<Doctor>[] = [
   {
@@ -125,34 +123,80 @@ export const columns: ColumnDef<Doctor>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const doctor = row.original;
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+      const handleDelete = async () => {
+        try {
+          const res = await fetch(`/api/doctors/${doctor.id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            console.log("Doctor deleted successfully");
+            setIsModalOpen(false);
+            window.location.reload();
+          } else {
+            console.error("Failed to delete doctor");
+            setIsModalOpen(false);
+          }
+        } catch (error) {
+          console.error("Error deleting doctor:", error);
+          setIsModalOpen(false);
+        }
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/doctors/${doctor.id}/edit`}>Edit</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">Delete</DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/doctors/${doctor.id}`}>View details</Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <AppModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleDelete}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/doctors/${doctor.id}/edit`}>Edit</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onSelect={() => {
+                  setIsModalOpen(true);
+                }}
+                variant="destructive"
+              >
+                Delete
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/doctors/${doctor.id}`}>
+                  View details
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       );
     },
   },
 ];
 
 export function UserDashboardPage() {
+  const [data, setData] = useState<Doctor[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/doctors");
+      const data = (await res.json()) as Doctor[];
+      setData(data);
+    };
+    fetchData();
+  }, []);
   return (
     <>
       <SiteHeader title="Doctors">

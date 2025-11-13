@@ -3,6 +3,7 @@ import db from "@/db";
 import { eq } from "drizzle-orm";
 import { userAppointmentSchema } from "@/lib/validation/userAppointmentSchema";
 import { appointments as appointmentsTable } from "@/db/schemas";
+import { appointmentSchema } from "@/lib/validation/appointmentSchema";
 /**
  * @openapi
  * /api/appointments/{id}:
@@ -83,8 +84,12 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const body = await req.json();
   const { id } = await params;
+  const body = await req.json();
+  const validation = userAppointmentSchema.safeParse(body);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   const updated = await db
     .update(appointmentsTable)
     .set({
@@ -96,10 +101,6 @@ export async function PUT(
     .where(eq(appointmentsTable.id, parseInt(id)))
     .returning()
     .get();
-  const validation = userAppointmentSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
 
   if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
   return NextResponse.json(updated);
@@ -110,15 +111,18 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
   const ok = await db
     .delete(appointmentsTable)
     .where(eq(appointmentsTable.id, parseInt(params.id)))
     .returning()
     .get();
-  const validation = userAppointmentSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
+  // const validation = userAppointmentSchema.safeParse(id);
+  // if (!validation.success) {
+  //   return NextResponse.json(validation.error.format(), { status: 400 });
+  // }
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

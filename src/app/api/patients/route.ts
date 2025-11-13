@@ -77,7 +77,10 @@ export async function GET() {
 
 export async function POST(req: Request) {
   const data = await req.json();
-
+  const validation = patientSchema.safeParse(data);
+  if (!validation.success) {
+    return NextResponse.json(validation.error.format(), { status: 400 });
+  }
   const patient = await db
     .insert(patientsTable)
     .values({
@@ -88,10 +91,6 @@ export async function POST(req: Request) {
     })
     .returning()
     .get();
-  const validation = patientSchema.safeParse(data);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
 
   return NextResponse.json(patient, { status: 201 });
 }

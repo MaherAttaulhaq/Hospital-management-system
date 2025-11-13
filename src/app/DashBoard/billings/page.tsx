@@ -18,8 +18,8 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import { billing } from "@/db/schemas";
-
-
+import AppModal from "@/components/app-modal";
+import { useEffect, useState } from "react";
 
 export type billings = {
   id: string;
@@ -29,8 +29,6 @@ export type billings = {
   status: string;
   paymentMethod: string;
 };
-const res = await fetch("/api/billings");
-const data = (await res.json()) as billings[];
 
 export const columns: ColumnDef<billings>[] = [
   {
@@ -68,7 +66,9 @@ export const columns: ColumnDef<billings>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("patientId")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("patientId")}</div>
+    ),
   },
   {
     accessorKey: "appointmentId",
@@ -83,7 +83,9 @@ export const columns: ColumnDef<billings>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("appointmentId")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("appointmentId")}</div>
+    ),
   },
   {
     accessorKey: "paymentMethod",
@@ -98,7 +100,9 @@ export const columns: ColumnDef<billings>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("paymentMethod")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("paymentMethod")}</div>
+    ),
   },
   {
     accessorKey: "amount",
@@ -128,7 +132,9 @@ export const columns: ColumnDef<billings>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("status")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("status")}</div>
+    ),
   },
   {
     header: "Actions",
@@ -136,38 +142,80 @@ export const columns: ColumnDef<billings>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const billing = row.original;
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+      const handleDelete = async () => {
+        try {
+          const res = await fetch(`/api/billings/${billing.id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            console.log("billing deleted successfully");
+            setIsModalOpen(false);
+            window.location.reload();
+          } else {
+            console.error("Failed to delete billing");
+            setIsModalOpen(false);
+          }
+        } catch (error) {
+          console.error("Error deleting billing:", error);
+          setIsModalOpen(false);
+        }
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/doctors/${billing.id}`}>Edit User</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              Delete User
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/doctors/${billing.id}`}>
-                View User details
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <AppModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleDelete}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/billings/${billing.id}`}>Edit User</Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                variant="destructive"
+                onSelect={() => {
+                  setIsModalOpen(true);
+                }}
+              >
+                Delete User
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/billings/${billing.id}`}>
+                  View User details
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       );
     },
   },
 ];
 
 export function UserDashboardPage() {
+  const [data, setData] = useState<billings[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/billings");
+      const data = (await res.json()) as billings[];
+      setData(data);
+    };
+    fetchData();
+  }, []);
   return (
     <>
       <SiteHeader title="Users">

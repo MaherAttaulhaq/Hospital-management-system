@@ -40,7 +40,7 @@ const CreatePharmacyItemForm = ({ pharmacy }: pharmacyFormProps) => {
   const form = useForm<z.infer<typeof pharmacySchema>>({
     resolver: zodResolver(pharmacySchema),
     defaultValues: {
-      userId: pharmacy?.userId || undefined,
+      // userId: pharmacy?.userId || "",
       name: pharmacy?.name || "",
       quantity: pharmacy?.quantity || undefined,
       price: pharmacy?.price || undefined,
@@ -73,30 +73,6 @@ const CreatePharmacyItemForm = ({ pharmacy }: pharmacyFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-        <FormField
-          control={form.control}
-          name="userId"
-          render={({ field }) => (
-            <FormItem>
-              <FormLabel>User</FormLabel>
-              <FormControl>
-                <Combobox
-                  options={users}
-                  onChange={(value) => {
-                    const parsedValue = parseInt(value, 10);
-                    if (!isNaN(parsedValue)) {
-                      field.onChange(parsedValue);
-                    } else {
-                      field.onChange(undefined);
-                    }
-                  }}
-                  value={field.value?.toString() || ""}
-                />
-              </FormControl>
-              <FormMessage />
-            </FormItem>
-          )}
-        />
         <FormField
           control={form.control}
           name="name"

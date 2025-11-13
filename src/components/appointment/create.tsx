@@ -15,7 +15,7 @@ import {
 import { Combobox } from "../ui/comboboxDemo";
 import { Input } from "../ui/input";
 import { appointmentSchema } from "@/lib/validation/appointmentSchema";
-
+import { AppointmentStatus } from "../../lib/validation/appointmentSchema";
 interface appointmentFormProps {
   appointment?: z.infer<typeof appointmentSchema> & { id: number };
 }
@@ -34,7 +34,6 @@ const CreateAppointmentForm: React.FC<appointmentFormProps> = ({
   );
 
   useEffect(() => {
-
     const fetchPatients = async () => {
       const res = await fetch("/api/patients");
       const data = await res.json();
@@ -65,11 +64,11 @@ const CreateAppointmentForm: React.FC<appointmentFormProps> = ({
   const form = useForm<z.infer<typeof appointmentSchema>>({
     resolver: zodResolver(appointmentSchema),
     defaultValues: appointment || {
-      userId: undefined,
+      // userId: undefined,
       patientId: undefined,
       doctorId: undefined,
       date: "",
-      status: "pending",
+      status: AppointmentStatus.Pending,
     },
   });
 
@@ -77,7 +76,9 @@ const CreateAppointmentForm: React.FC<appointmentFormProps> = ({
     if (appointment) {
       const formattedAppointment = {
         ...appointment,
-        date: appointment.date ? new Date(appointment.date).toISOString().split("T")[0] : "",
+        date: appointment.date
+          ? new Date(appointment.date).toISOString().split("T")[0]
+          : "",
       };
       form.reset(formattedAppointment);
     }

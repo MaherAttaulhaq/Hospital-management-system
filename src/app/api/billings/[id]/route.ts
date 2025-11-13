@@ -84,13 +84,12 @@ export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const { id } = await params;
   const body = await req.json();
   const validation = billingSchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
-
-  const { id } = params;
   const updated = await db
     .update(billingsTable)
     .set({
@@ -116,15 +115,18 @@ export async function DELETE(
   { params }: { params: { id: string } }
 ) {
   const { id } = await params;
+  if (!id) {
+    return NextResponse.json({ error: "Missing id" }, { status: 400 });
+  }
   const ok = await db
     .delete(billingsTable)
     .where(eq(billingsTable.id, parseInt(id)))
     .returning()
     .get();
-  const validation = billingSchema.safeParse(id);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
-  }
+  // const validation = billingSchema.safeParse(id);
+  // if (!validation.success) {
+  //   return NextResponse.json(validation.error.format(), { status: 400 });
+  // }
   if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
   return new NextResponse(null, { status: 204 });
 }

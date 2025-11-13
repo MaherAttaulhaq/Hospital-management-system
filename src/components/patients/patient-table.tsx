@@ -14,20 +14,12 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import AppModal from "@/components/app-modal";
+import { patients } from "@/lib/validation/patientSchema";
 
-export type Pharmacy = {
-  id: string;
-  name: string;
-  quantity: number;
-  expiryDate: number;
-  price: number;
-};
-
-export const columns: ColumnDef<Pharmacy>[] = [
+export const columns: ColumnDef<patients>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -51,67 +43,67 @@ export const columns: ColumnDef<Pharmacy>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "userId",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Name
-          <ArrowUpDown className="ml-2 h-4 w-4" />
-        </Button>
-      );
-    },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
-  },
-  {
-    accessorKey: "quantity",
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          Quantity
+          User ID
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("quantity")}</div>
+      <div className="capitalize">{row.getValue("userId")}</div>
     ),
   },
   {
-    accessorKey: "price",
+    accessorKey: "dob",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Price
+          DOB
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("price")}</div>,
+    cell: ({ row }) => <div className="lowercase">{row.getValue("dob")}</div>,
   },
   {
-    accessorKey: "expiryDate",
+    accessorKey: "gender",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Expiry Date
+          Gender
+          <ArrowUpDown className="ml-2 h-4 w-4" />
+        </Button>
+      );
+    },
+    cell: ({ row }) => <div>{row.getValue("gender")}</div>,
+  },
+  {
+    accessorKey: "medicalHistory",
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
+        >
+          Medical History
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("expiryDate")}</div>
+      <div className="capitalize">{row.getValue("medicalHistory")}</div>
     ),
   },
   {
@@ -119,24 +111,23 @@ export const columns: ColumnDef<Pharmacy>[] = [
     id: "actions",
     enableHiding: false,
     cell: ({ row }) => {
-      const pharmacy = row.original;
+      const patient = row.original;
       const [isModalOpen, setIsModalOpen] = React.useState(false);
-
       const handleDelete = async () => {
         try {
-          const res = await fetch(`/api/pharmacy/${pharmacy.id}`, {
+          const res = await fetch(`/api/patients/${patient.id}`, {
             method: "DELETE",
           });
           if (res.ok) {
-            console.log("pharmacy deleted successfully");
+            console.log("Patient deleted successfully");
             setIsModalOpen(false);
             window.location.reload();
           } else {
-            console.error("Failed to delete pharmacy");
+            console.error("Failed to delete patient");
             setIsModalOpen(false);
           }
         } catch (error) {
-          console.error("Error deleting pharmacy:", error);
+          console.error("Error deleting patient:", error);
           setIsModalOpen(false);
         }
       };
@@ -158,8 +149,8 @@ export const columns: ColumnDef<Pharmacy>[] = [
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/pharmacy/${pharmacy.id}/edit`}>
-                  Edit User
+                <Link href={`/dashboard/patients/${patient.id}/edit`}>
+                  Edit Patient
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -169,12 +160,12 @@ export const columns: ColumnDef<Pharmacy>[] = [
                   setIsModalOpen(true);
                 }}
               >
-                Delete User
+                Delete Patient
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/pharmacy/${pharmacy.id}`}>
-                  View User details
+                <Link href={`/dashboard/patients/${patient.id}`}>
+                  View Patient details
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -185,28 +176,10 @@ export const columns: ColumnDef<Pharmacy>[] = [
   },
 ];
 
-export function UserDashboardPage() {
-  const [data, setData] = React.useState<Pharmacy[]>([]);
-
-  React.useEffect(() => {
-    const fetchData = async () => {
-      const res = await fetch("/api/pharmacy");
-      const fetchedData = (await res.json()) as Pharmacy[];
-      setData(fetchedData);
-    };
-    fetchData();
-  }, []);
-  return (
-    <>
-      <SiteHeader title="Users">
-        <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New user</Link>
-        </Button>
-      </SiteHeader>
-      <div className="w-full px-4 lg:px-6">
-        <TanStackTable columns={columns} data={data} />
-      </div>
-    </>
-  );
+interface PatientTableProps {
+  data: patients[];
 }
-export default UserDashboardPage;
+
+export function PatientTable({ data }: PatientTableProps) {
+  return <TanStackTable columns={columns} data={data} />;
+}

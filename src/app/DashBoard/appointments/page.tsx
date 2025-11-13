@@ -17,26 +17,18 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
-import { appointments } from "@/db/schemas";
+import { useEffect, useState } from "react";
+import AppModal from "@/components/app-modal";
 
 export type Appointment = {
-  id: string;
+  id:string;
   patientId: Number;
   doctorId: Number;
   date: Number;
   status: string;
 };
 
-const res = await fetch("/api/appointments");
-const data = (await res.json()) as Appointment[];
 
-export type User = {
-  id: string;
-  patientId: Number;
-  doctorId: Number;
-  date: Number;
-  status: string;
-};
 
 export const columns: ColumnDef<Appointment>[] = [
   {
@@ -74,7 +66,9 @@ export const columns: ColumnDef<Appointment>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("patientId")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("patientId")}</div>
+    ),
   },
   {
     accessorKey: "doctorId",
@@ -89,7 +83,9 @@ export const columns: ColumnDef<Appointment>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("doctorId")}</div>,
+    cell: ({ row }) => (
+      <div className="lowercase">{row.getValue("doctorId")}</div>
+    ),
   },
   {
     accessorKey: "date",
@@ -119,7 +115,9 @@ export const columns: ColumnDef<Appointment>[] = [
         </Button>
       );
     },
-    cell: ({ row }) => <div className="capitalize">{row.getValue("status")}</div>,
+    cell: ({ row }) => (
+      <div className="capitalize">{row.getValue("status")}</div>
+    ),
   },
   {
     header: "Actions",
@@ -127,43 +125,83 @@ export const columns: ColumnDef<Appointment>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const appointment = row.original;
+      const [isModalOpen, setIsModalOpen] = React.useState(false);
+
+      const handleDelete = async () => {
+        try {
+          const res = await fetch(`/api/appointments/${appointment.id}`, {
+            method: "DELETE",
+          });
+          if (res.ok) {
+            console.log("appointment deleted successfully");
+            setIsModalOpen(false);
+            window.location.reload();
+          } else {
+            console.error("Failed to delete appointment");
+            setIsModalOpen(false);
+          }
+        } catch (error) {
+          console.error("Error deleting appointment:", error);
+          setIsModalOpen(false);
+        }
+      };
 
       return (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="h-8 w-8 p-0">
-              <span className="sr-only">Open menu</span>
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/appointments/${appointment.id}/edit`}>Edit User</Link>
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              Delete User
-            </DropdownMenuItem>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/appointments/${appointment.id}`}>
-                View User details
-              </Link>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <>
+          <AppModal
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+            onConfirm={handleDelete}
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Actions</DropdownMenuLabel>
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/appointments/${appointment.id}/edit`}>
+                  Edit User
+                </Link>
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem variant="destructive" 
+                onClick={() => setIsModalOpen(true)}>
+                Delete User
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/appointments/${appointment.id}`}>
+                  View User details
+                </Link>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </>
       );
     },
   },
 ];
 
-export function UserDashboardPage() {
+export function AppointmentsDashboardPage() {
+  const [data, setData] = useState<Appointment[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/appointments");
+      const appointments = await res.json();
+      setData(appointments);
+    };
+    fetchData();
+  }, []);
   return (
     <>
-      <SiteHeader title="Users">
+      <SiteHeader title="Appointments">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New user</Link>
+          <Link href="/dashboard/appointments/create">New appointment</Link>
         </Button>
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">
@@ -172,4 +210,4 @@ export function UserDashboardPage() {
     </>
   );
 }
-export default UserDashboardPage;
+export default AppointmentsDashboardPage;

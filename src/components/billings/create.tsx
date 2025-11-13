@@ -47,7 +47,7 @@ const CreateForm: React.FC<billingFormProps> = ({ billing }) => {
       const data = await res.json();
       const formattedPatients = data.map(
         (patient: { id: number; name: string }) => ({
-          label: patient.name,
+          label: patient.id,
           value: patient.id.toString(),
         })
       );
@@ -74,7 +74,7 @@ const CreateForm: React.FC<billingFormProps> = ({ billing }) => {
   const form = useForm<z.infer<typeof billingSchema>>({
     resolver: zodResolver(billingSchema),
     defaultValues: billing ||{
-      userId: undefined,
+      // userId: undefined,
       patientId: undefined,
       appointmentId: undefined,
       amount: undefined,

@@ -76,7 +76,7 @@ const Create = ({ prescription }: prescriptionFormProps) => {
   const form = useForm<z.infer<typeof prescriptionSchema>>({
     resolver: zodResolver(prescriptionSchema),
     defaultValues: prescription || {
-      userId: undefined,
+      // userId: undefined,
       patientId: undefined,
       doctorId: undefined,
       appointmentId: undefined,
@@ -88,10 +88,11 @@ const Create = ({ prescription }: prescriptionFormProps) => {
   async function onSubmit(values: z.infer<typeof prescriptionSchema>) {
     let method = "";
     let url = "";
-
-    if (prescriptions?.id) {
+   console.log("submit btn");
+   
+    if (prescription?.id) {
       method = "PUT";
-      url = `/api/prescriptions/${prescriptions.id}`;
+      url = `/api/prescriptions/${prescription.id}`;
     } else {
       method = "POST";
       url = "/api/prescriptions";
