@@ -14,6 +14,8 @@ export const users = sqliteTable("users", {
   createdAt: text("created_at").default(sql`CURRENT_TIMESTAMP`),
 });
 
+export type UserRole = typeof users.$inferSelect.role;
+
 // ---------------- ACCOUNTS ----------------
 export const accounts = sqliteTable("accounts", {
   id: integer("id").primaryKey({ autoIncrement: true }),

@@ -52,20 +52,20 @@ export const columns: ColumnDef<Doctor>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "userId",
+    accessorKey: "name",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          User ID
+          Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("userId")}</div>
+      <div className="capitalize">{row.getValue("name")}</div>
     ),
   },
   {
@@ -194,6 +194,7 @@ export function UserDashboardPage() {
       const res = await fetch("/api/doctors");
       const data = (await res.json()) as Doctor[];
       setData(data);
+      console.log(data);
     };
     fetchData();
   }, []);

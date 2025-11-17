@@ -54,37 +54,37 @@ export const columns: ColumnDef<billings>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "patientId",
+    accessorKey: "patientName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          patientId
+          patientName
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("patientId")}</div>
+      <div className="capitalize">{row.getValue("patientName")}</div>
     ),
   },
   {
-    accessorKey: "appointmentId",
+    accessorKey: "appointmentDate",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          appointmentId
+          appointmentDate
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("appointmentId")}</div>
+      <div className="lowercase">{row.getValue("appointmentDate")}</div>
     ),
   },
   {
@@ -212,13 +212,14 @@ export function UserDashboardPage() {
     const fetchData = async () => {
       const res = await fetch("/api/billings");
       const data = (await res.json()) as billings[];
+      console.log(data);
       setData(data);
     };
     fetchData();
   }, []);
   return (
     <>
-      <SiteHeader title="Users">
+      <SiteHeader title="Billings">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
           <Link href="/dashboard/users/create">New user</Link>
         </Button>

@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import db from "@/db";
-import { pharmacy, pharmacy as pharmacyTable } from "@/db/schemas";
+import { pharmacy as pharmacyTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
-import { patientSchema } from "@/lib/validation/patientSchema";
 import { pharmacySchema } from "@/lib/validation/pharmacySchema";
+import { auth } from "./../../../../../auth"; // Adjust path as needed
+import { checkPermissions } from "@/lib/permissions";
+
 /**
  * @openapi
  * /api/pharmacy/{id}:
@@ -11,12 +13,6 @@ import { pharmacySchema } from "@/lib/validation/pharmacySchema";
  *     summary: Get a pharmacy by ID
  *     tags:
  *       - Pharmacy
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       '200':
  *         description: OK
@@ -24,99 +20,134 @@ import { pharmacySchema } from "@/lib/validation/pharmacySchema";
  *           application/json:
  *             schema:
  *               $ref: '#/components/schemas/Doctor'
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
  *       '404':
  *         description: Not found
  *   put:
  *     summary: Update a pharmacy
  *     tags:
  *       - Pharmacy
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             $ref: '#/components/schemas/Doctor'
  *     responses:
  *       '200':
  *         description: Updated
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
  *   delete:
  *     summary: Delete a doctor
  *     tags:
  *       - Pharmacy
- *     parameters:
- *       - in: path
- *         name: id
- *         required: true
- *         schema:
- *           type: string
  *     responses:
  *       '204':
  *         description: Deleted
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
  */
 
 export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
-  const patient = await db
-    .select()
-    .from(pharmacyTable)
-    .where(eq(pharmacyTable.id, parseInt(id)))
-    .get();
-  // const validation = patientSchema.safeParse(id);
-  // if (!validation.success) {
-  //   return NextResponse.json(validation.error.format(), { status: 400 });
-  // }
-  if (!patient) {
-    return NextResponse.json({ error: "Not found", status: 404 });
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
-  return NextResponse.json(patient);
+
+  const userRole = session.user.role as any;
+  const pharmacyId = parseInt(params.id);
+
+  const pharmacyItem = await db
+    .select({
+      id: pharmacyTable.id,
+      name: pharmacyTable.name,
+      quantity: pharmacyTable.quantity,
+      price: pharmacyTable.price,
+      expiryDate: pharmacyTable.expiryDate,
+    })
+    .from(pharmacyTable)
+    .where(eq(pharmacyTable.id, pharmacyId))
+    .get();
+
+  if (!pharmacyItem) {
+    return NextResponse.json({ error: "Not found" }, { status: 404 });
+  }
+
+  // Admin, Doctor, and Patient can read a specific pharmacy item
+  if (checkPermissions(userRole, "Pharmacy", "read")) {
+    return NextResponse.json(pharmacyItem);
+  }
+
+  return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 }
+
 export async function PUT(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const userRole = session.user.role as any;
+  const pharmacyId = parseInt(params.id);
+
   const body = await req.json();
-  const { id } = params;
-  const updated = await db
-    .update(pharmacyTable)
-    .set({
-      name: body.name,
-      quantity: body.quantity,
-      price: body.price,
-      expiryDate: body.expiryDate,
-    })
-    .where(eq(pharmacyTable.id, parseInt(id)))
-    .returning()
-    .get();
   const validation = pharmacySchema.safeParse(body);
   if (!validation.success) {
     return NextResponse.json(validation.error.format(), { status: 400 });
   }
-  if (!updated) return NextResponse.json({ error: "Not found", status: 404 });
-  return NextResponse.json(updated);
+
+  // Admin can update a specific pharmacy item
+  if (checkPermissions(userRole, "Pharmacy", "update")) {
+    const updated = await db
+      .update(pharmacyTable)
+      .set({
+        name: body.name,
+        quantity: body.quantity,
+        price: body.price,
+        expiryDate: body.expiryDate,
+      })
+      .where(eq(pharmacyTable.id, pharmacyId))
+      .returning()
+      .get();
+
+    if (!updated)
+      return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(updated);
+  }
+
+  return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 }
 
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
 ) {
-  const { id } = await params;
-  if (!id) {
-    return NextResponse.json({ error: "Not found", status: 404 });
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
-  const ok = await db
-    .delete(pharmacyTable)
-    .where(eq(pharmacyTable.id, parseInt(params.id)))
-    .returning()
-    .get();
-  if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return new NextResponse(null, { status: 204 });
+
+  const userRole = session.user.role as any;
+  const pharmacyId = parseInt(params.id);
+
+  // Admin can delete a specific pharmacy item
+  if (checkPermissions(userRole, "Pharmacy", "delete")) {
+    const ok = await db
+      .delete(pharmacyTable)
+      .where(eq(pharmacyTable.id, pharmacyId))
+      .returning()
+      .get();
+    if (!ok) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return new NextResponse(null, { status: 204 });
+  }
+
+  return NextResponse.json({ message: "Forbidden" }, { status: 403 });
 }

@@ -3,6 +3,8 @@ import db from "@/db";
 import { eq } from "drizzle-orm";
 import { pharmacy as pharmacyTable } from "@/db/schemas";
 import { pharmacySchema } from "@/lib/validation/pharmacySchema";
+import { auth } from "../../../../auth"; // Adjust path as needed
+import { checkPermissions } from "@/lib/permissions";
 
 /**
  * @openapi
@@ -31,6 +33,10 @@ import { pharmacySchema } from "@/lib/validation/pharmacySchema";
  *                     type: number
  *                   expiryDate:
  *                     type: string
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
  *   post:
  *     summary: Create a pharmacy item
  *     tags:
@@ -70,30 +76,61 @@ import { pharmacySchema } from "@/lib/validation/pharmacySchema";
  *                   type: string
  *       '400':
  *         description: Invalid input
+ *       '401':
+ *         description: Unauthorized
+ *       '403':
+ *         description: Forbidden
  */
 export async function GET() {
-  const pharmacy = await db.select().from(pharmacyTable);
-  return NextResponse.json(pharmacy);
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
+  const userRole = session.user.role as any;
+
+  // Admin, Doctor, and Patient can read all pharmacy items
+  if (checkPermissions(userRole, "Pharmacy", "read")) {
+    const pharmacy = await db.select({
+      id: pharmacyTable.id,
+      name: pharmacyTable.name,
+      quantity: pharmacyTable.quantity,
+      price: pharmacyTable.price,
+      expiryDate: pharmacyTable.expiryDate,
+    }).from(pharmacyTable);
+    return NextResponse.json(pharmacy);
+  } else {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
 }
 
 export async function POST(req: Request) {
-  const data = await req.json();
-  console.log("data", data);
-  const pharmacy = await db
-    .insert(pharmacyTable)
-    .values({
-      name: data.name,
-      quantity: data.quantity,
-      price: data.price,
-      expiryDate: data.expiryDate,
-    } as any)
-    .returning()
-    .get();
-
-  const validation = pharmacySchema.safeParse(data);
-  if (!validation.success) {
-    return NextResponse.json(validation.error.format(), { status: 400 });
+  const session = await auth();
+  if (!session || !session.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  return NextResponse.json(pharmacy, { status: 201 });
+  const userRole = session.user.role as any;
+
+  // Admin can create pharmacy items
+  if (checkPermissions(userRole, "Pharmacy", "create")) {
+    const data = await req.json();
+    const validation = pharmacySchema.safeParse(data);
+    if (!validation.success) {
+      return NextResponse.json(validation.error.format(), { status: 400 });
+    }
+    const pharmacy = await db
+      .insert(pharmacyTable)
+      .values({
+        name: data.name,
+        quantity: data.quantity,
+        price: data.price,
+        expiryDate: data.expiryDate,
+      } as any)
+      .returning()
+      .get();
+    return NextResponse.json(pharmacy, { status: 201 });
+  } else {
+    return NextResponse.json({ message: "Forbidden" }, { status: 403 });
+  }
 }

@@ -18,7 +18,7 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import { prescriptions } from "@/db/schemas";
-import { useEffect , useState} from "react";
+import { useEffect, useState } from "react";
 export type prescriptions = {
   id: string;
   appointmentId: string;
@@ -52,53 +52,53 @@ export const columns: ColumnDef<prescriptions>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "appointmentId",
+    accessorKey: "appointmentDate",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Appointment ID
+          Appointment Date
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("appointmentId")}</div>
+      <div className="capitalize">{row.getValue("appointmentDate")}</div>
     ),
   },
   {
-    accessorKey: "doctorId",
+    accessorKey: "doctorName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Doctor ID
+          Doctor Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("doctorId")}</div>
+      <div className="lowercase">{row.getValue("doctorName")}</div>
     ),
   },
   {
-    accessorKey: "patientId",
+    accessorKey: "patientName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          Patient ID
+          Patient Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
-    cell: ({ row }) => <div>{row.getValue("patientId")}</div>,
+    cell: ({ row }) => <div>{row.getValue("patientName")}</div>,
   },
   {
     accessorKey: "medicineList",
@@ -177,7 +177,10 @@ export const columns: ColumnDef<prescriptions>[] = [
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive" onClick={() => setIsModalOpen(true)}>
+            <DropdownMenuItem
+              variant="destructive"
+              onClick={() => setIsModalOpen(true)}
+            >
               Delete User
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -200,13 +203,14 @@ export function UserDashboardPage() {
     const fetchData = async () => {
       const res = await fetch("/api/prescriptions");
       const data = (await res.json()) as prescriptions[];
+      console.log(data);
       setData(data);
     };
     fetchData();
   }, []);
   return (
     <>
-      <SiteHeader title="Users">
+      <SiteHeader title="Prescriptions">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
           <Link href="/dashboard/users/create">New user</Link>
         </Button>

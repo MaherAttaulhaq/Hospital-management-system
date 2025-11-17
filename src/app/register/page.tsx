@@ -13,37 +13,33 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useForm } from "react-hook-form";
-import { signIn } from "next-auth/react";
-import { useRouter } from "next/navigation";
-
-export function LoginPage() {
+import router from "next/router";
+export function CardDemo() {
   const {
     register,
     handleSubmit,
     formState: { errors },
   } = useForm();
-  const route = useRouter();
   const onSubmit = async (data: any) => {
     console.log(data);
     try {
-      const result = await signIn("credentials", {
-        email: data.email,
-        password: data.password,
-        redirect: false, // Prevents automatic redirect and allows for custom error handling
+      const result = await fetch("/api/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
       });
-      console.log(result);
-      if (!result?.error) {
-        console.log("Login successful");
-        route.push("/dashboard"); // Redirect to a protected page on success
-      } else {
+
+      if (!result.ok) {
         // setError(result.error);
-        console.log(result.error);
+      } else if (result?.ok) {
+        router.push("/login");
       }
     } catch (e) {
       // setError("An unknown error occurred.");
     }
   };
-
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Card className="w-full max-w-sm mx-auto mt-30">
@@ -53,22 +49,32 @@ export function LoginPage() {
             Enter your email below to login to your account
           </CardDescription>
           <CardAction>
-            <Link href="/register">
-              <Button variant="link">Sign Up</Button>
+            <Link href="/login">
+              <Button variant="link">Login</Button>
             </Link>
           </CardAction>
         </CardHeader>
         <CardContent>
           <div className="flex flex-col gap-6">
             <div className="grid gap-2">
-              <Label htmlFor="email">Email</Label>
+              <Label htmlFor="name">Name</Label>
               <Input
-                id="email"
-                type="email"
-                placeholder="m@example.com"
+                id="name"
+                type="text"
+                {...register("name")}
+                placeholder="attaulhaq"
                 required
-                {...register("email")}
               />
+              <div className="grid gap-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="attaulhaq@example.com"
+                  {...register("email")}
+                  required
+                />
+              </div>
             </div>
             <div className="grid gap-2">
               <div className="flex items-center">
@@ -91,11 +97,11 @@ export function LoginPage() {
         </CardContent>
         <CardFooter className="flex-col gap-2">
           <Button type="submit" className="w-full">
-            Login
+            Register user
           </Button>
         </CardFooter>
       </Card>
     </form>
   );
 }
-export default LoginPage;
+export default CardDemo;

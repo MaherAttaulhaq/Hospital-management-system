@@ -198,7 +198,7 @@ export function UserDashboardPage() {
   }, []);
   return (
     <>
-      <SiteHeader title="Users">
+      <SiteHeader title="Pharmacy">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
           <Link href="/dashboard/users/create">New user</Link>
         </Button>

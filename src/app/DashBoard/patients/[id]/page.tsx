@@ -24,6 +24,8 @@ const Page: NextPage<Props> = async ({ params }) => {
     `${process.env.NEXT_PUBLIC_API_URL}/api/patients/${id}`
   );
   const data = await res.json();
+  console.log(data);
+
   return (
     <div className="p-8 max-w-lg mx-auto">
       <Card>

@@ -21,14 +21,12 @@ import { useEffect, useState } from "react";
 import AppModal from "@/components/app-modal";
 
 export type Appointment = {
-  id:string;
+  id: string;
   patientId: Number;
   doctorId: Number;
   date: Number;
   status: string;
 };
-
-
 
 export const columns: ColumnDef<Appointment>[] = [
   {
@@ -54,37 +52,37 @@ export const columns: ColumnDef<Appointment>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "patientId",
+    accessorKey: "patientName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          patientId
+          patientName
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="capitalize">{row.getValue("patientId")}</div>
+      <div className="capitalize">{row.getValue("patientName")}</div>
     ),
   },
   {
-    accessorKey: "doctorId",
+    accessorKey: "doctorName",
     header: ({ column }) => {
       return (
         <Button
           variant="ghost"
           onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
         >
-          doctorId
+          Doctor Name
           <ArrowUpDown className="ml-2 h-4 w-4" />
         </Button>
       );
     },
     cell: ({ row }) => (
-      <div className="lowercase">{row.getValue("doctorId")}</div>
+      <div className="lowercase">{row.getValue("doctorName")}</div>
     ),
   },
   {
@@ -168,8 +166,10 @@ export const columns: ColumnDef<Appointment>[] = [
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive" 
-                onClick={() => setIsModalOpen(true)}>
+              <DropdownMenuItem
+                variant="destructive"
+                onClick={() => setIsModalOpen(true)}
+              >
                 Delete User
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -193,6 +193,7 @@ export function AppointmentsDashboardPage() {
     const fetchData = async () => {
       const res = await fetch("/api/appointments");
       const appointments = await res.json();
+      console.log(appointments);
       setData(appointments);
     };
     fetchData();
