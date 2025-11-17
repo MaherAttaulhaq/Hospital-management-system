@@ -154,12 +154,11 @@ export const columns: ColumnDef<Doctor>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                {/* <span className="sr-only">Open menu</span> */}
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/doctors/${doctor.id}/edit`}>Edit</Link>
               </DropdownMenuItem>
@@ -175,7 +174,7 @@ export const columns: ColumnDef<Doctor>[] = [
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/doctors/${doctor.id}`}>
-                  View details
+                  View 
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -202,7 +201,7 @@ export function UserDashboardPage() {
     <>
       <SiteHeader title="Doctors">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New doctor</Link>
+          <Link href="/dashboard/doctors/create">New doctor</Link>
         </Button>
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">

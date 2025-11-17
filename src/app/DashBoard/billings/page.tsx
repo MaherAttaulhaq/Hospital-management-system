@@ -173,14 +173,13 @@ export const columns: ColumnDef<billings>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                {/* <span className="sr-only">Open menu</span> */}
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/billings/${billing.id}`}>Edit User</Link>
+                <Link href={`/dashboard/billings/${billing.id}`}>Edit </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem
@@ -189,12 +188,12 @@ export const columns: ColumnDef<billings>[] = [
                   setIsModalOpen(true);
                 }}
               >
-                Delete User
+                Delete 
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/billings/${billing.id}`}>
-                  View User details
+                  View User 
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
@@ -221,7 +220,7 @@ export function UserDashboardPage() {
     <>
       <SiteHeader title="Billings">
         <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New user</Link>
+          <Link href="/dashboard/billings/create">New Billing</Link>
         </Button>
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">

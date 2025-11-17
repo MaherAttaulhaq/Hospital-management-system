@@ -154,15 +154,14 @@ export const columns: ColumnDef<Appointment>[] = [
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="h-8 w-8 p-0">
-                <span className="sr-only">Open menu</span>
+                {/* <span className="sr-only">Open menu</span> */}
                 <MoreHorizontal className="h-4 w-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuLabel>Actions</DropdownMenuLabel>
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/appointments/${appointment.id}/edit`}>
-                  Edit User
+                  Edit 
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
@@ -170,12 +169,12 @@ export const columns: ColumnDef<Appointment>[] = [
                 variant="destructive"
                 onClick={() => setIsModalOpen(true)}
               >
-                Delete User
+                Delete 
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/appointments/${appointment.id}`}>
-                  View User details
+                  View  
                 </Link>
               </DropdownMenuItem>
             </DropdownMenuContent>
