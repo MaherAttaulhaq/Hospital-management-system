@@ -1,7 +1,15 @@
 import { useSession } from "next-auth/react";
-import { hasPermission, Role, Resource, PermissionAction } from "@/lib/rbac";
+import {
+  checkPermissions as hasPermission,
+  Role,
+  Resource,
+  PermissionAction,
+} from "@/lib/rbac";
 
-export function useHasPermission(resource: string, permission: PermissionAction): boolean {
+export function useHasPermission(
+  resource: string,
+  permission: PermissionAction
+): boolean {
   const { data: session, status } = useSession();
 
   if (status === "loading") {

@@ -4,7 +4,7 @@ import { pharmacy as pharmacyTable } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import { pharmacySchema } from "@/lib/validation/pharmacySchema";
 import { auth } from "./../../../../../auth"; // Adjust path as needed
-import { checkPermissions } from "@/lib/permissions";
+import { checkPermissions } from "@/lib/rbac";
 
 /**
  * @openapi
@@ -54,7 +54,12 @@ export async function GET(
   req: Request,
   { params }: { params: { id: string } }
 ) {
+  console.log("from pharmacy server");
+  console.log("API Route received cookie:", req.headers.get('cookie'));
+
   const session = await auth();
+  console.log("session from pharmacy", session);
+
   if (!session || !session.user) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
