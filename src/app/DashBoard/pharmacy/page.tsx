@@ -18,6 +18,7 @@ import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import AppModal from "@/components/app-modal";
+import { useHasPermission } from "@/hooks/use-has-permission";
 
 export type Pharmacy = {
   id: string;
@@ -121,6 +122,10 @@ export const columns: ColumnDef<Pharmacy>[] = [
     cell: ({ row }) => {
       const pharmacy = row.original;
       const [isModalOpen, setIsModalOpen] = React.useState(false);
+      const canUpdatePharmacy = useHasPermission("Pharmacy", "update");
+      const canDeletePharmacy = useHasPermission("Pharmacy", "delete");
+      const canReadPharmacy = useHasPermission("Pharmacy", "read");
+      const canReadOwnPharmacy = useHasPermission("Pharmacy", "readOwn");
 
       const handleDelete = async () => {
         try {
@@ -155,26 +160,32 @@ export const columns: ColumnDef<Pharmacy>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/pharmacy/${pharmacy.id}/edit`}>
-                  Edit 
-                </Link>
-              </DropdownMenuItem>
+              {canUpdatePharmacy && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/pharmacy/${pharmacy.id}/edit`}>
+                    Edit 
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => {
-                  setIsModalOpen(true);
-                }}
-              >
-                Delete 
-              </DropdownMenuItem>
+              {canDeletePharmacy && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Delete 
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/pharmacy/${pharmacy.id}`}>
-                  View 
-                </Link>
-              </DropdownMenuItem>
+              {(canReadPharmacy || canReadOwnPharmacy) && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/pharmacy/${pharmacy.id}`}>
+                    View 
+                  </Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </>
@@ -185,6 +196,7 @@ export const columns: ColumnDef<Pharmacy>[] = [
 
 export function UserDashboardPage() {
   const [data, setData] = React.useState<Pharmacy[]>([]);
+  const canCreatePharmacy = useHasPermission("Pharmacy", "create");
 
   React.useEffect(() => {
     const fetchData = async () => {
@@ -197,9 +209,11 @@ export function UserDashboardPage() {
   return (
     <>
       <SiteHeader title="Pharmacy">
-        <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/pharmacy/create">create pharmacy</Link>
-        </Button>
+        {canCreatePharmacy && (
+          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Link href="/dashboard/pharmacy/create">create pharmacy</Link>
+          </Button>
+        )}
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">
         <TanStackTable columns={columns} data={data} />

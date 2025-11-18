@@ -1,31 +1,7 @@
 import { useSession } from "next-auth/react";
-import { checkPermissions } from "@/lib/permissions";
-import { UserRole } from "@/db/schemas";
+import { hasPermission, Role, Resource, PermissionAction } from "@/lib/rbac";
 
-type Resource =
-  | "Doctor"
-  | "Patient"
-  | "Appointment"
-  | "Prescription"
-  | "Billing"
-  | "Pharmacy";
-
-type Permission =
-  | "create"
-  | "read"
-  | "update"
-  | "delete"
-  | "readOwn"
-  | "updateOwn"
-  | "createOwn"
-  | "cancelOwn"
-  | "updateStatus"
-  | "readAssigned"
-  | "createForOwnPatients"
-  | "updateForOwnPatients"
-  | "readOwnPrescriptions";
-
-export function useHasPermission(resource: Resource, permission: Permission): boolean {
+export function useHasPermission(resource: string, permission: PermissionAction): boolean {
   const { data: session, status } = useSession();
 
   if (status === "loading") {
@@ -36,6 +12,8 @@ export function useHasPermission(resource: Resource, permission: Permission): bo
     return false;
   }
 
-  const userRole = session.user.role as UserRole;
-  return checkPermissions(userRole, resource, permission);
+  const userRole = session.user.role as Role;
+  const resourceName = resource as Resource;
+
+  return hasPermission(userRole, resourceName, permission);
 }

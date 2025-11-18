@@ -19,6 +19,7 @@ import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import { useEffect, useState } from "react";
 import AppModal from "@/components/app-modal";
+import { useHasPermission } from "@/hooks/use-has-permission";
 
 export type Appointment = {
   id: string;
@@ -124,6 +125,10 @@ export const columns: ColumnDef<Appointment>[] = [
     cell: ({ row }) => {
       const appointment = row.original;
       const [isModalOpen, setIsModalOpen] = React.useState(false);
+      const canUpdateAppointment = useHasPermission("Appointment", "update");
+      const canDeleteAppointment = useHasPermission("Appointment", "delete");
+      const canReadAppointment = useHasPermission("Appointment", "read");
+      const canReadOwnAppointment = useHasPermission("Appointment", "readOwn");
 
       const handleDelete = async () => {
         try {
@@ -159,24 +164,30 @@ export const columns: ColumnDef<Appointment>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/appointments/${appointment.id}/edit`}>
-                  Edit 
-                </Link>
-              </DropdownMenuItem>
+              {canUpdateAppointment && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/appointments/${appointment.id}/edit`}>
+                    Edit
+                  </Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onClick={() => setIsModalOpen(true)}
-              >
-                Delete 
-              </DropdownMenuItem>
+              {canDeleteAppointment && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onClick={() => setIsModalOpen(true)}
+                >
+                  Delete
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/appointments/${appointment.id}`}>
-                  View  
-                </Link>
-              </DropdownMenuItem>
+              {(canReadAppointment || canReadOwnAppointment) && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/appointments/${appointment.id}`}>
+                    View
+                  </Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </>
@@ -187,6 +198,7 @@ export const columns: ColumnDef<Appointment>[] = [
 
 export function AppointmentsDashboardPage() {
   const [data, setData] = useState<Appointment[]>([]);
+  const canCreateAppointment = useHasPermission("Appointment", "create");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -200,9 +212,11 @@ export function AppointmentsDashboardPage() {
   return (
     <>
       <SiteHeader title="Appointments">
-        <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/appointments/create">New appointment</Link>
-        </Button>
+        {canCreateAppointment && (
+          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Link href="/dashboard/appointments/create">New appointment</Link>
+          </Button>
+        )}
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">
         <TanStackTable columns={columns} data={data} />

@@ -19,6 +19,7 @@ import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
 import { billing } from "@/db/schemas";
 import AppModal from "@/components/app-modal";
+import { useHasPermission } from "@/hooks/use-has-permission";
 import { useEffect, useState } from "react";
 
 export type billings = {
@@ -144,6 +145,10 @@ export const columns: ColumnDef<billings>[] = [
       const billing = row.original;
       const [isModalOpen, setIsModalOpen] = React.useState(false);
 
+      const canUpdateBilling = useHasPermission("Billing", "update");
+      const canDeleteBilling = useHasPermission("Billing", "delete");
+      const canReadBilling = useHasPermission("Billing", "read");
+      const canReadOwnBilling = useHasPermission("Billing", "readOwn");
       const handleDelete = async () => {
         try {
           const res = await fetch(`/api/billings/${billing.id}`, {
@@ -178,24 +183,30 @@ export const columns: ColumnDef<billings>[] = [
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/billings/${billing.id}`}>Edit </Link>
-              </DropdownMenuItem>
+              {canUpdateBilling && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/billings/${billing.id}`}>Edit</Link>
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem
-                variant="destructive"
-                onSelect={() => {
-                  setIsModalOpen(true);
-                }}
-              >
-                Delete 
-              </DropdownMenuItem>
+              {canDeleteBilling && (
+                <DropdownMenuItem
+                  variant="destructive"
+                  onSelect={() => {
+                    setIsModalOpen(true);
+                  }}
+                >
+                  Delete
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
-              <DropdownMenuItem asChild>
-                <Link href={`/dashboard/billings/${billing.id}`}>
-                  View User 
-                </Link>
-              </DropdownMenuItem>
+              {(canReadBilling || canReadOwnBilling) && (
+                <DropdownMenuItem asChild>
+                  <Link href={`/dashboard/billings/${billing.id}`}>
+                    View
+                  </Link>
+                </DropdownMenuItem>
+              )}
             </DropdownMenuContent>
           </DropdownMenu>
         </>
@@ -206,6 +217,7 @@ export const columns: ColumnDef<billings>[] = [
 
 export function UserDashboardPage() {
   const [data, setData] = useState<billings[]>([]);
+  const canCreateBilling = useHasPermission("Billing", "create");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -219,9 +231,11 @@ export function UserDashboardPage() {
   return (
     <>
       <SiteHeader title="Billings">
-        <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/billings/create">New Billing</Link>
-        </Button>
+        {canCreateBilling && (
+          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Link href="/dashboard/billings/create">New Billing</Link>
+          </Button>
+        )}
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">
         <TanStackTable columns={columns} data={data} />

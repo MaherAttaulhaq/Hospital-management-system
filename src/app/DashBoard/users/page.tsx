@@ -17,6 +17,7 @@ import {
 import { SiteHeader } from "@/components/site-header";
 import Link from "next/link";
 import { TanStackTable } from "@/components/tanstack-table";
+import { useHasPermission } from "@/hooks/use-has-permission";
 
 export type User = {
   id: string;
@@ -24,9 +25,6 @@ export type User = {
   email: string;
   role: string;
 };
-
-const res = await fetch("/api/users");
-const data = (await res.json()) as User[];
 
 export const columns: ColumnDef<User>[] = [
   {
@@ -102,6 +100,10 @@ export const columns: ColumnDef<User>[] = [
     enableHiding: false,
     cell: ({ row }) => {
       const User = row.original;
+      const canUpdateUser = useHasPermission("User", "update");
+      const canDeleteUser = useHasPermission("User", "delete");
+      const canReadUser = useHasPermission("User", "read");
+      const canReadOwnUser = useHasPermission("User", "readOwn");
 
       return (
         <DropdownMenu>
@@ -113,19 +115,25 @@ export const columns: ColumnDef<User>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
-            </DropdownMenuItem>
+            {canUpdateUser && (
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem variant="destructive">
-              Delete User
-            </DropdownMenuItem>
+            {canDeleteUser && (
+              <DropdownMenuItem variant="destructive">
+                Delete User
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/dashboard/users/${User.id}`}>
-                View User details
-              </Link>
-            </DropdownMenuItem>
+            {(canReadUser || canReadOwnUser) && (
+              <DropdownMenuItem asChild>
+                <Link href={`/dashboard/users/${User.id}`}>
+                  View User details
+                </Link>
+              </DropdownMenuItem>
+            )}
           </DropdownMenuContent>
         </DropdownMenu>
       );
@@ -134,12 +142,26 @@ export const columns: ColumnDef<User>[] = [
 ];
 
 export function UserDashboardPage() {
+  const [data, setData] = React.useState<User[]>([]);
+  const canCreateUser = useHasPermission("User", "create");
+
+  React.useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch("/api/users");
+      const fetchedData = (await res.json()) as User[];
+      setData(fetchedData);
+    };
+    fetchData();
+  }, []);
+
   return (
     <>
       <SiteHeader title="Users">
-        <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
-          <Link href="/dashboard/users/create">New user</Link>
-        </Button>
+        {canCreateUser && (
+          <Button variant="ghost" asChild size="sm" className="hidden sm:flex">
+            <Link href="/dashboard/users/create">New user</Link>
+          </Button>
+        )}
       </SiteHeader>
       <div className="w-full px-4 lg:px-6">
         <TanStackTable columns={columns} data={data} />
