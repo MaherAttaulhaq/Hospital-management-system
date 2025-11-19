@@ -7,7 +7,7 @@ import {
 } from "@/db/schemas";
 import { eq } from "drizzle-orm";
 import { billingSchema } from "@/lib/validation/billingSchema";
-import { auth } from "../../../../auth"; // Adjust path as needed
+import { auth } from "./../../../../../auth"; // Adjust path as needed
 import { checkPermissions } from "@/lib/permissions";
 
 /**
@@ -145,7 +145,6 @@ export async function PUT(
 export async function DELETE(
   req: Request,
   { params }: { params: { id: string } }
-}
 ) {
   const session = await auth();
   if (!session || !session.user) {

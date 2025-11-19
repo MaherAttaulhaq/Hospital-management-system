@@ -7,7 +7,7 @@ import {
   patients as patientsTable,
 } from "@/db/schemas";
 import { userAppointmentSchema } from "@/lib/validation/userAppointmentSchema";
-import { auth } from "../../../../auth"; // Adjust path as needed
+import { auth } from "./../../../../../auth";
 import { checkPermissions } from "@/lib/permissions";
 
 /**

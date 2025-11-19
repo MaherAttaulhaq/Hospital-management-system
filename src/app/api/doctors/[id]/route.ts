@@ -3,7 +3,7 @@ import db from "@/db";
 import { doctors as doctorsTable, users as usersTable } from "@/db/schemas";
 import { eq, sql } from "drizzle-orm";
 import { doctorSchema } from "@/lib/validation/doctorSchema";
-import { auth } from "../../../../../auth"; // Adjust path as needed
+import { auth } from "./../../../../../auth"; // Adjust path as needed
 import { checkPermissions } from "@/lib/permissions";
 
 /**

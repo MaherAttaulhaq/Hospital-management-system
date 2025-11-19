@@ -10,7 +10,7 @@ import {
 } from "@/db/schemas";
 import { prescriptionSchema } from "@/lib/validation/prescriptionSchema";
 import { alias } from "drizzle-orm/sqlite-core";
-import { auth } from "../../../../auth"; // Adjust path as needed
+import { auth } from "./../../../../../auth";
 import { checkPermissions } from "@/lib/permissions";
 
 /**

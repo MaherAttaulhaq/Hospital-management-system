@@ -11,29 +11,26 @@ import {
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { CreditCard, SquarePen } from "lucide-react";
 import { NextPage } from "next";
-import { headers } from "next/headers";
-import { useEffect } from "react";
+import { use, useEffect, useState } from "react";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-const Page: NextPage<Props> = async ({ params }) => {
-  // Mock data to populate the card
-  const { id } = await params;
-  const headerList = await headers();
-  const cookie = headerList.get("cookie");
+const Page: NextPage<Props> = ({ params }) => {
+  const { id } = use(params);
+  const [pharmacyData, setPharmacyData] = useState({
+    name: "",
+    quantity: 0,
+    id: 0,
+    expiryDate: "",
+    price: 0,
+  });
   useEffect(() => {
     const fetchData = async () => {
-      const res = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/api/pharmacy/${id}`,
-        {
-          headers: {
-            Cookie: cookie || "",
-          },
-        }
-      );
+      const res = await fetch(`/api/pharmacy/${id}`);
       const data = await res.json();
+      setPharmacyData(data);
       console.log(data);
     };
     fetchData();
@@ -44,8 +41,8 @@ const Page: NextPage<Props> = async ({ params }) => {
       <Card>
         {/* Card Header */}
         <CardHeader>
-          <CardTitle>Order {data.name}</CardTitle>
-          <CardDescription>Placed on {data.quantity}</CardDescription>
+          <CardTitle>Order {pharmacyData.name}</CardTitle>
+          <CardDescription>Placed on {pharmacyData.quantity}</CardDescription>
         </CardHeader>
 
         {/* Card Content */}
@@ -58,9 +55,9 @@ const Page: NextPage<Props> = async ({ params }) => {
               <h3 className="font-medium text-gray-900">
                 Customer Information
               </h3>
-              <p className="text-gray-500 text-sm">{data.price}</p>
-              <p className="text-gray-500 text-sm">{data.expiryDate}</p>
-              <p className="text-gray-500 text-sm">{data.id}</p>
+              <p className="text-gray-500 text-sm">{pharmacyData.price}</p>
+              <p className="text-gray-500 text-sm">{pharmacyData.expiryDate}</p>
+              <p className="text-gray-500 text-sm">{pharmacyData.id}</p>
             </div>
           </div>
 
@@ -73,7 +70,7 @@ const Page: NextPage<Props> = async ({ params }) => {
                   className="size-4 text-gray-400"
                   aria-hidden="true"
                 />
-                {data.expiryDate}
+                {pharmacyData.expiryDate}
               </div>
             </div>
             <Button variant="outline" className="shrink-0">

@@ -8,7 +8,7 @@ import {
 } from "@/db/schemas";
 import { eq, and } from "drizzle-orm";
 import { patientSchema } from "@/lib/validation/patientSchema";
-import { auth } from "../../../../auth"; // Adjust path as needed
+import { auth } from "./../../../../../auth"; // Adjust path as needed
 import { checkPermissions } from "@/lib/permissions";
 
 /**
