@@ -10,29 +10,45 @@ import {
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { CreditCard, SquarePen } from "lucide-react";
 import { NextPage } from "next";
+import { use, useEffect, useState } from "react";
 import { da } from "zod/v4/locales";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-const Page: NextPage<Props> = async ({ params }) => {
+const Page: NextPage<Props> =  ({ params }) => {
   // Mock data to populate the card
   
-  const { id } = await params;
-  const res = await fetch(
-    `${process.env.NEXT_PUBLIC_API_URL}/api/patients/${id}`
-  );
-  const data = await res.json();
-  console.log(data);
+  const { id } = use(params);
+
+  const [doctorData, setDoctorData] = useState({
+    id:0,
+    userId:0,
+    name:"",
+    dob:"",
+    gender:"",
+    medicalHistory:"",
+  });
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch(
+        `/api/doctors/${id}`
+      );
+      const data = await res.json();
+      setDoctorData(data);
+      console.log(data);
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="p-8 max-w-lg mx-auto">
       <Card>
         {/* Card Header */}
         <CardHeader>
-          <CardTitle>Order {data.id}</CardTitle>
-          <CardDescription>Placed on {data.dob}</CardDescription>
+          <CardTitle>Order {doctorData.id}</CardTitle>
+          <CardDescription>Placed on {doctorData.dob}</CardDescription>
         </CardHeader>
 
         {/* Card Content */}
@@ -45,9 +61,9 @@ const Page: NextPage<Props> = async ({ params }) => {
               <h3 className="font-medium text-gray-900">
                 Customer Information
               </h3>
-              <p className="text-gray-500 text-sm">{data.userId}</p>
-              <p className="text-gray-500 text-sm">{data.gender}</p>
-              <p className="text-gray-500 text-sm">{data.medicalHistory}</p>
+              <p className="text-gray-500 text-sm">{doctorData.userId}</p>
+              <p className="text-gray-500 text-sm">{doctorData.gender}</p>
+              <p className="text-gray-500 text-sm">{doctorData.medicalHistory}</p>
             </div>
           </div>
 
@@ -60,7 +76,7 @@ const Page: NextPage<Props> = async ({ params }) => {
                   className="size-4 text-gray-400"
                   aria-hidden="true"
                 />
-                {data.userId}
+                {doctorData.userId}
               </div>
             </div>
             <Button variant="outline" className="shrink-0">

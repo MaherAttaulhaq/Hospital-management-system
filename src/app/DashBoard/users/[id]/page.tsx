@@ -10,16 +10,34 @@ import {
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { CreditCard, SquarePen } from "lucide-react";
 import { NextPage } from "next";
+import { use, useEffect, useState } from "react";
 
 interface Props {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
-const Page: NextPage<Props> = async ({ params }) => {
+const Page: NextPage<Props> =  ({ params }) => {
   // Mock data to populate the card
-  const { id } = await params;
-  const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/users/${id}`);
-  const data = await res.json();
+  const { id } = use(params);
+
+  const [data, setData] = useState({
+    id:0,
+    notes:"",
+    name:"",
+    email:"",
+    role:"",
+  });
+  useEffect(() => {
+    const fetchData = async () => {
+      const res = await fetch(
+        `/api/prescriptions/${id}`
+      );
+      const data = await res.json();
+      setData(data);
+      console.log(data);
+    };
+    fetchData();
+  }, []);
 
   return (
     <div className="p-8 max-w-lg mx-auto mt-10">
