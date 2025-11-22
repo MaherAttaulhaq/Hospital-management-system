@@ -124,14 +124,14 @@ export async function GET() {
     if (!doctor) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
-    appointmentsQuery = appointmentsQuery.where(eq(appointmentsTable.doctorId, doctor.id));
+    appointmentsQuery.where(and(eq(appointmentsTable.doctorId, doctor.id)));
   } else if (userRole === "patient" && checkPermissions(userRole, "Appointment", "createOwn")) { // Using createOwn as a proxy for readOwn for now
     // Patient can view their own appointments
     const patient = await db.select().from(patientsTable).where(eq(patientsTable.userId, userId)).get();
     if (!patient) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
-    appointmentsQuery = appointmentsQuery.where(eq(appointmentsTable.patientId, patient.id));
+    appointmentsQuery.where(and(eq(appointmentsTable.patientId, patient.id)));
   } else {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }

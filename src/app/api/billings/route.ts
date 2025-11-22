@@ -104,7 +104,7 @@ export async function GET() {
 
   const patientUser = alias(usersTable, "patientUser");
 
-  let billingsQuery = db
+  const billingsQuery = db
     .select({
       id: billingsTable.id,
       patientId: billingsTable.patientId,
@@ -131,7 +131,7 @@ export async function GET() {
     if (!patient) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
-    billingsQuery = billingsQuery.where(eq(billingsTable.patientId, patient.id));
+    billingsQuery.where(and(eq(billingsTable.patientId, patient.id)));
   } else {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }

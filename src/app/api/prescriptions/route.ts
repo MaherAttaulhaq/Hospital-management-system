@@ -10,7 +10,7 @@ import {
 } from "@/db/schemas";
 import { prescriptionSchema } from "@/lib/validation/prescriptionSchema";
 import { alias } from "drizzle-orm/sqlite-core";
-import { auth } from "./../../../../../auth";
+import { auth } from "../../../../auth";
 import { checkPermissions } from "@/lib/permissions";
 
 /**
@@ -106,7 +106,7 @@ export async function GET() {
   const doctorUser = alias(usersTable, "doctorUser");
   const patientUser = alias(usersTable, "patientUser");
 
-  let prescriptionsQuery = db
+  const prescriptionsQuery = db
     .select({
       id: prescriptionsTable.id,
       patientId: prescriptionsTable.patientId,
@@ -137,14 +137,14 @@ export async function GET() {
     if (!doctor) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
-    prescriptionsQuery = prescriptionsQuery.where(eq(prescriptionsTable.doctorId, doctor.id));
+    prescriptionsQuery.where(and(eq(prescriptionsTable.doctorId, doctor.id)));
   } else if (userRole === "patient" && checkPermissions(userRole, "Prescription", "readOwnPrescriptions")) {
     // Patient can only view prescriptions written for them
     const patient = await db.select().from(patientsTable).where(eq(patientsTable.userId, userId)).get();
     if (!patient) {
       return NextResponse.json({ message: "Forbidden" }, { status: 403 });
     }
-    prescriptionsQuery = prescriptionsQuery.where(eq(prescriptionsTable.patientId, patient.id));
+    prescriptionsQuery.where(and(eq(prescriptionsTable.patientId, patient.id)));
   } else {
     return NextResponse.json({ message: "Forbidden" }, { status: 403 });
   }

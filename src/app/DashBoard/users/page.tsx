@@ -117,20 +117,20 @@ export const columns: ColumnDef<User>[] = [
             <DropdownMenuLabel>Actions</DropdownMenuLabel>
             {canUpdateUser && (
               <DropdownMenuItem asChild>
-                <Link href={`/dashboard/users/${User.id}/edit`}>Edit User</Link>
+                <Link href={`/dashboard/users/${User.id}/edit`}>Edit </Link>
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             {canDeleteUser && (
               <DropdownMenuItem variant="destructive">
-                Delete User
+                Delete 
               </DropdownMenuItem>
             )}
             <DropdownMenuSeparator />
             {(canReadUser || canReadOwnUser) && (
               <DropdownMenuItem asChild>
                 <Link href={`/dashboard/users/${User.id}`}>
-                  View User details
+                  View 
                 </Link>
               </DropdownMenuItem>
             )}
