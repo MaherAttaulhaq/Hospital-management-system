@@ -8,8 +8,9 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
+import { InfiniteSlider } from "../../components/motion-primitives/infinite-slider";
 import { TextShimmer } from "../../components/motion-primitives/text-shimmer";
-import { TextScramble } from '../../components/motion-primitives/text-scramble';
+import { TextScramble } from "../../components/motion-primitives/text-scramble";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import {
   Menu,
@@ -106,14 +107,14 @@ export default function LandingPage() {
       <section className="bg-primary text-primary-foreground py-20 md:py-32">
         <div className="container mx-auto px-6 md:px-8 grid md:grid-cols-2 gap-8 items-center">
           <div className="space-y-4">
-            <h1 className="text-4xl md:text-5xl font-bold">
+            <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-black to-white bg-clip-text text-transparent">
               Modernizing Hospital Management
             </h1>
-            <TextShimmer className="font-mono text-xl" duration={1}>
+            <p className="font-mono text-xl ">
               Our Hospital Management System provides a comprehensive solution
               to streamline your hospital's operations, from patient management
               to billing and everything in between.
-            </TextShimmer>
+            </p>
             <div>
               <Button
                 size="lg"
@@ -134,7 +135,7 @@ export default function LandingPage() {
           <div className="text-center space-y-4 mb-12 flex flex-col items-center">
             <TextShimmer className="text-3xl md:text-4xl font-bold">
               Features
-              </TextShimmer>
+            </TextShimmer>
             <TextShimmer className="text-muted-foreground text-lg">
               Our HMS is packed with features to make your hospital run
               smoothly.
@@ -199,7 +200,9 @@ export default function LandingPage() {
       <section id="about" className="py-16 md:py-24 bg-muted">
         <div className="container mx-auto px-6 md:px-8 grid md:grid-cols-2 gap-8 items-center">
           <div>
-            <TextScramble className="text-3xl md:text-4xl font-bold mb-4">About Us</TextScramble>
+            <TextScramble className="text-3xl md:text-4xl font-bold mb-4">
+              About Us
+            </TextScramble>
             <p className="text-muted-foreground text-lg">
               We are a team of passionate developers and healthcare
               professionals dedicated to improving hospital management through
@@ -207,7 +210,7 @@ export default function LandingPage() {
               and comprehensive solution for hospitals of all sizes.
             </p>
           </div>
-          <div className="hidden md:block">
+          <div className="hidden md:block ml-20">
             <img src="/images.JFIF" alt="About us" className="rounded-lg" />
           </div>
         </div>
@@ -215,49 +218,55 @@ export default function LandingPage() {
       <section id="testimonials" className="py-16 md:py-24">
         <div className="container mx-auto px-6 md:px-8">
           <div className="text-center space-y-4 mb-12 flex flex-col items-center">
-            <TextShimmer className="text-3xl md:text-4xl font-bold">Testimonials</TextShimmer>
+            <TextShimmer className="text-3xl md:text-4xl font-bold">
+              Testimonials
+            </TextShimmer>
             <TextShimmer className=" text-lg">
               See what our happy customers have to say about our HMS.
             </TextShimmer>
           </div>
-          <div className="grid md:grid-cols-2 gap-8">
-            <div className="bg-card p-6 rounded-lg shadow-md">
-              <div className="flex items-center gap-4 mb-4">
-                <Avatar>
-                  <AvatarImage src="/avatar-01.svg" />
-                  <AvatarFallback>JD</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-semibold">John Doe</h3>
-                  <p className="text-muted-foreground">CEO, General Hospital</p>
+          <InfiniteSlider gap={24} reverse>
+            <div className="grid md:grid-cols-2 gap-8">
+              <div className="bg-card max-w-md p-6 rounded-lg shadow-md">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar>
+                    <AvatarImage src="/avatar-01.svg" />
+                    <AvatarFallback>JD</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-xl font-semibold">John Doe</h3>
+                    <p className="text-muted-foreground">
+                      CEO, General Hospital
+                    </p>
+                  </div>
                 </div>
+                <p className="text-muted-foreground">
+                  "This HMS has transformed our hospital's operations. It's easy
+                  to use, and the support team is always responsive. I highly
+                  recommend it!"
+                </p>
               </div>
-              <p className="text-muted-foreground">
-                "This HMS has transformed our hospital's operations. It's easy
-                to use, and the support team is always responsive. I highly
-                recommend it!"
-              </p>
-            </div>
-            <div className="bg-card p-6 rounded-lg shadow-md">
-              <div className="flex items-center gap-4 mb-4">
-                <Avatar>
-                  <AvatarImage src="/avatar-02.svg" />
-                  <AvatarFallback>JS</AvatarFallback>
-                </Avatar>
-                <div>
-                  <h3 className="text-xl font-semibold">Jane Smith</h3>
-                  <p className="text-muted-foreground">
-                    IT Manager, City Clinic
-                  </p>
+              <div className="bg-card max-w-md p-6 rounded-lg shadow-md">
+                <div className="flex items-center gap-4 mb-4">
+                  <Avatar>
+                    <AvatarImage src="/avatar-02.svg" />
+                    <AvatarFallback>JS</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h3 className="text-xl font-semibold">Jane Smith</h3>
+                    <p className="text-muted-foreground">
+                      IT Manager, City Clinic
+                    </p>
+                  </div>
                 </div>
+                <p className="text-muted-foreground">
+                  "We were looking for an affordable and comprehensive HMS, and
+                  this product exceeded our expectations. It has all the
+                  features we need, and it's very user-friendly."
+                </p>
               </div>
-              <p className="text-muted-foreground">
-                "We were looking for an affordable and comprehensive HMS, and
-                this product exceeded our expectations. It has all the features
-                we need, and it's very user-friendly."
-              </p>
             </div>
-          </div>
+          </InfiniteSlider>
         </div>
       </section>
 
