@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -10,7 +11,7 @@ import {
 import { Separator } from "@radix-ui/react-dropdown-menu";
 import { CreditCard, SquarePen } from "lucide-react";
 import { NextPage } from "next";
-import { use, useEffect, useState } from "react";
+import { use, useState, useEffect} from "react";
 
 interface Props {
   params: Promise<{ id: string }>;
@@ -30,7 +31,7 @@ const Page: NextPage<Props> =  ({ params }) => {
   useEffect(() => {
     const fetchData = async () => {
       const res = await fetch(
-        `/api/prescriptions/${id}`
+        `/api/users/${id}`
       );
       const data = await res.json();
       setData(data);
