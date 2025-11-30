@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Card,
   CardContent,
@@ -5,10 +7,14 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { NextPage } from "next";
 import CreateAppointmentForm from "@/components/appointment/create";
+import { useEffect, useState } from "react";
+import { z } from "zod";
+import { NextPage } from "next";
+
+// Copied from src/lib/validation/appointmentSchema.ts
 type Props = {
-  params: { id: string };
+   params: Promise<{ id: string }>;
 };
 const Page: NextPage<Props> = async ({ params }) => {
   const {id} = await params;
