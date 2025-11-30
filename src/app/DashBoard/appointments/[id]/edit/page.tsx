@@ -5,10 +5,13 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { NextPage } from "next";
 import CreateAppointmentForm from "@/components/appointment/create";
-
-const Page = async ({ params }: { params: { id:string } }) => {
-  const {id} = params;
+type Props = {
+  params: { id: string };
+};
+const Page: NextPage<Props> = async ({ params }) => {
+  const {id} = await params;
   console.log(id);
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_API_URL}/api/appointments/${id}`
