@@ -29,7 +29,7 @@ export type Appointment = {
   status: string;
 };
 
-export const columns: ColumnDef<Appointment>[] = [
+const columns: ColumnDef<Appointment>[] = [
   {
     id: "select",
     header: ({ table }) => (
